@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>{ username } account</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	</head>
+    <body>
+		<!-- Navbar -->
+		<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+			<!-- logo -->
+			<a class="navbar-brand">Clash Finder</a>
+			<!-- Links -->
+			<ul class="navbar-nav">
+				<li class="nav-item">
+					<li class="nav-item">
+						<a class="nav-link" href="#">Find Teammates</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#">Find Team</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#">About</a>
+					</li>
+				</li>
+			</ul>
+		</nav>
+        <!-- account info -->
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h2>{ username | title }</h2>
+                        <div class="account-info">
+                            <label for="username">Username:</label>
+                            <div class="form-group"> { username } </div>
+                        </div>
+                        <div class="account-info">
+                            <label for="email">Email:</label>
+                            <div class="form-group"> { email } </div>
+                        </div>
+                        <!-- Lista dodanych profili -->
+						<div class="account-info">
+                            <label for="profiles">Profiles:</label>
+                            <table>
+								<thead>
+								  <tr>
+									<th>Lp.</th>
+									<th>Nickname</th>
+									<th>Server</th>
+									<th>Division</th>
+									<th>Best position</th>
+									<th>Alternative position</th>
+								  </tr>
+								</thead>
+								<tbody>
+								  {% for profile in profiles %}
+									<tr>
+									  <td>{{ loop.index }}</td>
+									  <td>{{ profile.nickname }}</td>
+									  <td>{{ profile.server }}</td>
+									  <td>{{ profile.division }}</td>
+									  <td>{{ profile.best_position }}</td>
+									  <td>{{ profile.alternative_position }}</td>
+									</tr>
+								  {% endfor %}
+								</tbody>
+							 </table>
+                        </div>
+					<h2>Add another profile</h2>
+					<form method="POST" action="{{ url_for('user') }}">
+						{{ form.hidden_tag() }}
+						<div class="form-group">
+							{{ form.nickname.label(class="form-control-label") }}
+							{{ form.nickname(class="form-control form-control-sm") }}
+						</div>
+						<div class="form-group">
+							{{ form.server.label(class="form-control-label") }}
+							{{ form.server(class="form-control form-control-sm") }}
+						</div>
+						<div class="form-group">
+							{{ form.division.label(class="form-control-label") }}
+							{{ form.division(class="form-control form-control-sm") }}
+						</div>
+						<div class="form-group">
+							{{ form.pref_role.label(class="form-control-label") }}
+							{{ form.pref_role(class="form-control form-control-sm") }}
+						</div>
+						<div class="form-group">
+							{{ form.alternative_role.label(class="form-control-label") }}
+							{{ form.alternative_role(class="form-control form-control-sm") }}
+						</div>
+						<button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+					

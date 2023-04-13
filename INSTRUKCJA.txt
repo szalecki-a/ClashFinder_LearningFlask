@@ -1,0 +1,6 @@
+heroku login
+git init
+heroku create**
+pip install psycopg2**
+pip install gunicorn**
+pip freeze > requirements.txt*

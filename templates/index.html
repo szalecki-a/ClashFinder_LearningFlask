@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Clash Tournament - Find Your Teammates</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	</head>
+	<body>
+		<!-- Navbar -->
+		<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+			<!-- logo -->
+			<a class="navbar-brand">Clash Finder</a>
+
+
+			<!-- Links -->
+			<ul class="navbar-nav">
+				<li class="nav-item">
+					<li class="nav-item">
+						<a class="nav-link" href="#">Find Teammates</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#">Find Team</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#">About</a>
+					</li>
+				</li>
+			</ul>
+		</nav>
+		<!-- Main content -->
+		<div class="jumbotron jumbotron-fluid">
+			<div class="container">
+				<h1>Looking for Teammates</h1>
+				<p>Find your teammates or team up to compete in the ultimate Clash tournament!</p>
+				<p>Create account and build your Dream Team</p>
+				<a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Get Started</a>
+			</div>
+		</div>
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-6">
+					<h4>Already have an account?</h4>
+					<a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">Sign in</a>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
