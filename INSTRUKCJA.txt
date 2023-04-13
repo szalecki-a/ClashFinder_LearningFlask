@@ -11,3 +11,17 @@ git push heroku master
 
 heroku run python
 from app import db ***
+
+- przy każdym uruchomieniu
+
+heroku login
+git init
++aktywacja środowiska 
+
+
+-przy każdej zmianie:
+git add .
+git commit -m "komentarz"
+git push heroku master
+
+heroku open do otworzenia strony

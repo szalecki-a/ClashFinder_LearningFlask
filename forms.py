@@ -7,6 +7,7 @@ servers = [('North America', 'NA'), ('West Europe', 'EUW'), ('North and Eeat Eur
 positions = [('Toplane', 'Toplane'), ('Jungle', 'Jungle'), ('Midlane', 'Midlane'), ('Bottom', 'Bottom'), ('Support', 'Support')]
 divisions = [('Iron', 'Iron'), ('Bronze', 'Bronze'), ('Silver', 'Silver'), ('Gold', 'Gold'), ('Platinum', 'Platinum'), ('Diamond', 'Diamond'), ('higher', 'higher')]
 months = [(1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'), (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'), (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')]
+months_days = {'January': 31, 'February': 28, 'March': 31, 'April': 30, 'May': 31, 'June': 30, 'July': 31, 'August': 31, 'September': 30, 'October': 31, 'November': 30, 'December': 31}
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -43,6 +44,21 @@ class SearchingTeam(FlaskForm):
     def __init__(self, user_id, *args, **kwargs):
         super(SearchingTeam, self).__init__(*args, **kwargs)
         self.profile.choices = [(p.id, p.name) for p in Profile.query.filter_by(user_id=user_id)]
+
+'''
+#
+class CreatingTeam(FlaskForm):
+    profile = SelectField('Profile', coerce=int, validators=[DataRequired()])
+    role = SelectField('Select Role', choices=positions)
+    month = SelectField('Month', choices=months)
+    day_options = [(i, str(i)) for i in range(1, 32)]  # lista opcji od 1 do 31
+    day = SelectField('Day', choices=day_options)
+    submit = SubmitField('Create Team')
+
+    def __init__(self, user_id, *args, **kwargs):
+        super(CreatingTeam, self).__init__(*args, **kwargs)
+        self.profile.choices = [(p.id, p.name) for p in Profile.query.filter_by(user_id=user_id)]
+'''
 
 
 
