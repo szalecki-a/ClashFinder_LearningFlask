@@ -5,7 +5,7 @@ from os import environ
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'loltotoksycznagra'
-app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('DATABASE_URL') or 'sqlite:///clash_DB.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('DATABASE_URL').replace("://", "ql://", 1) or 'sqlite:///clash_DB.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -17,4 +17,3 @@ login.login_view = 'login'
 from routes import *
 
 #if __name__ == '__main__':
-#    app.run()
