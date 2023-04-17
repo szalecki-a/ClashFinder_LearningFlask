@@ -12,6 +12,8 @@ git push heroku master
 heroku run python
 from app import db ***
 
+
+
 - przy każdym uruchomieniu
 
 heroku login

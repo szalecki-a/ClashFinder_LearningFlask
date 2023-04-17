@@ -1,11 +1,13 @@
-from flask import Flask, render_template, request
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_required
-from os import environ
+from flask_login import LoginManager
+# from os import environ
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'loltotoksycznagra'
-app.config['SQLALCHEMY_DATABASE_URI'] = environ.get('DATABASE_URL').replace("://", "ql://", 1) or 'sqlite:///clash_DB.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///clash_db.db'
+#app.config['SQLALCHEMY_DATABASE_URI'] = environ.get(
+#    'DATABASE_URL').replace("://", "ql://", 1) or 'sqlite:///clash_DB.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -14,7 +16,7 @@ login.init_app(app)
 login.login_view = 'login'
 
 
-from routes import *
+import routes, models
 
-#if __name__ == '__main__':
-#    with app.app_context():
+if __name__ == '__main__':
+    app.run(debug=True)

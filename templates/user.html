@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>{{ user.username }} account</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	</head>
+    <body>
+		<!-- Navbar -->
+		<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+			<!-- logo -->
+			<a class="navbar-brand">Clash Finder</a>
+			<!-- Links -->
+			<ul class="navbar-nav">
+				<li class="nav-item">
+					<a class="nav-link" href="#">Find Teammates</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="#">Find Team</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="#">About</a>
+				</li>
+			</ul>
+			<!-- Right-aligned items -->
+			<ul class="navbar-nav ml-auto">
+				<li class="nav-item">
+					<form method="post" action="{{ url_for('logout') }}">
+						<button type="submit" class="btn btn-link nav-link">Logout</button>
+					</form>
+				</li>
+			</ul>
+		</nav>
+        <!-- account info -->
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h2>{{ user.username | title }}</h2>
+                        <div class="account-info">
+                            <div class="form-group row">
+                                <label for="username" class="col-sm-4 col-form-label">Username:</label>
+                                <div class="col-sm-8">
+                                    <div class="form-control">{{ user.username }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="account-info">
+                            <div class="form-group row">
+                                <label for="email" class="col-sm-4 col-form-label">Email:</label>
+                                <div class="col-sm-8">
+                                    <div class="form-control">{{ user.email }}</div>
+                                </div>
+                            </div>
+                        </div>
+						<style>
+							table {
+							  border-collapse: collapse;
+							  font-size: 0.9em;
+							  border: 1px solid #ddd;
+							}
+							
+							th {
+							  border: 1px solid #ddd;
+							  padding: 8px;
+							  text-align: left;
+							}
+							
+							td {
+							  border: 1px solid #ddd;
+							  padding: 8px;
+							}
+							</style>							
+						<!-- Lista dodanych profili -->
+						<div class="account-info">
+							<label for="profiles"><h2>Profiles</h2></label>
+							<table>
+								<thead>
+									<tr>
+										<th><strong>Lp.</strong></th>
+										<th><strong>Nickname</strong></th>
+										<th><strong>Server</strong></th>
+										<th><strong>Division</strong></th>
+										<th><strong>Best position</strong></th>
+										<th><strong>Alternative position</strong></th>
+									</tr>
+								</thead>
+								<tbody>
+									{% for profile in profiles %}
+									<tr>
+										<td>{{ loop.index }}</td>
+										<td>{{ profile.nickname }}</td>
+										<td>{{ profile.server }}</td>
+										<td>{{ profile.division }}</td>
+										<td>{{ profile.best_position }}</td>
+										<td>{{ profile.alternative_position }}</td>
+									</tr>
+									{% endfor %}
+								</tbody>
+							</table>
+						</div>						
+					<h2>Add another profile</h2>
+					{% if flash %}
+        				{% for message in flash %}
+            				<span class="flash-message">{{ message }}</span>
+        				{% endfor %}
+    				{% endif %}
+					<form method="POST" action="{{ url_for('create_profile', username=user.username) }}">
+						{{ form.hidden_tag() }}
+						<div class="form-group">
+							{{ form.nickname.label(class="form-control-label") }}
+							{{ form.nickname(class="form-control form-control-sm") }}
+						</div>
+						<div class="form-group">
+							{{ form.server.label(class="form-control-label") }}
+							{{ form.server(class="form-control form-control-sm") }}
+						</div>
+						<div class="form-group">
+							{{ form.division.label(class="form-control-label") }}
+							{{ form.division(class="form-control form-control-sm") }}
+						</div>
+						<div class="form-group">
+							{{ form.pref_role.label(class="form-control-label") }}
+							{{ form.pref_role(class="form-control form-control-sm") }}
+						</div>
+						<div class="form-group">
+							{{ form.alternative_role.label(class="form-control-label") }}
+							{{ form.alternative_role(class="form-control form-control-sm") }}
+						</div>
+						<button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+						{% with messages = get_flashed_messages() %}
+							{% if messages %}
+								<div class="alert alert-danger">
+									{% for message in messages %}
+										<p>{{ message }}</p>
+									{% endfor %}
+								</div>
+							{% endif %}
+						{% endwith %}
+					</form>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+					

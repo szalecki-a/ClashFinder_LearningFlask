@@ -42,6 +42,15 @@
 					{{ form.password.label(class="form-control-label") }}
 					{{ form.password(class="form-control form-control-sm") }}
 				</div>
+				{% with messages = get_flashed_messages() %}
+					{% if messages %}
+						<div class="alert alert-danger">
+							{% for message in messages %}
+								<p>{{ message }}</p>
+							{% endfor %}
+						</div>
+					{% endif %}
+				{% endwith %}
 				<div class="form-group form-check">
 					{{ form.remember_me(class="form-check-input") }}
 					{{ form.remember_me.label(class="form-check-label") }}
