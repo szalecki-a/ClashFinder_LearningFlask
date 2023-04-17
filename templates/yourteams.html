@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>{{ user.username }}'s Clash Teams</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	</head>
+    <body>
+		<!-- Navbar -->
+		<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+			<!-- logo -->
+			<a class="navbar-brand">Clash Finder</a>
+			<!-- Links -->
+			<ul class="navbar-nav">
+				<li class="nav-item">
+					<a class="nav-link" href="#">Find Teammates</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="#">Find Team</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="#">About</a>
+				</li>
+			</ul>
+			<!-- Right-aligned items -->
+			<ul class="navbar-nav ml-auto">
+				<li class="nav-item">
+					<form method="post" action="{{ url_for('logout') }}">
+						<button type="submit" class="btn btn-link nav-link">Logout</button>
+					</form>
+				</li>
+			</ul>
+		</nav>
+        <!-- teams info -->
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h2>Your Clash Teams</h2>
+						<style>
+							table {
+							  border-collapse: collapse;
+							  font-size: 0.9em;
+							  border: 1px solid #ddd;
+							}
+							
+							th {
+							  border: 1px solid #ddd;
+							  padding: 8px;
+							  text-align: left;
+							}
+							
+							td {
+							  border: 1px solid #ddd;
+							  padding: 8px;
+							}
+							</style>							
+						<!-- Lista dodanych profili -->
+						<div class="teams-info">
+							<label for="teams"><h2>Your Teams</h2></label>
+							{% if your_clash_teams %}
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th><strong>Lp.</strong></th>
+                                        <th><strong>TOPLANE</strong></th>
+                                        <th><strong>JUNGLE</strong></th>
+                                        <th><strong>MIDLANE</strong></th>
+                                        <th><strong>BOTTOM</strong></th>
+                                        <th><strong>SUPPORT</strong></th>
+                                        <th><strong>CLASH DATE</strong></th>
+                                        <th><strong>HOST DIVISION</strong></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for team in your_clash_teams %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td><a href="{% if profile.toplane %}/x/{{ profile.toplane }}{% else %}#{% endif %}">{{ profile.toplane or 'join' }}</a></td>
+                                        <td><a href="{% if profile.jungle %}/x/{{ profile.jungle }}{% else %}#{% endif %}">{{ profile.jungle or 'join' }}</a></td>
+                                        <td><a href="{% if profile.midlane %}/x/{{ profile.midlane }}{% else %}#{% endif %}">{{ profile.midlane or 'join' }}</a></td>
+                                        <td><a href="{% if profile.adcarry %}/x/{{ profile.adcarry }}{% else %}#{% endif %}">{{ profile.adcarry or 'join' }}</a></td>
+                                        <td><a href="{% if profile.support %}/x/{{ profile.support }}{% else %}#{% endif %}">{{ profile.support or 'join' }}</a></td>
+                                        <td>{{ profile.clash_date or '' }}</td>
+                                        <td>{{ profile.division or '' }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <p>Currently  you do not belong to any Clash Team.</p>
+                            {% endif %}
+						</div>	
+                        <!-- Przycisk do strony z wyszukiwaniem druzyn -->
+						<a href="{{ url_for('X') }}" class="btn btn-primary btn-lg">Find a Team</a>
+					<h2>Create your Clash Team</h2>
+					{% if flash %}
+        				{% for message in flash %}
+            				<span class="flash-message">{{ message }}</span>
+        				{% endfor %}
+    				{% endif %}
+					{% with messages = get_flashed_messages() %}
+						{% if messages %}
+							<div class="alert alert-danger">
+								{% for message in messages %}
+									<p>{{ message }}</p>
+								{% endfor %}
+							</div>
+						{% endif %}
+					{% endwith %}
+					<form method="POST" action="{{ url_for('create_team', username=user.username) }}">
+						{{ form.hidden_tag() }}
+						<div class="form-group">
+							{{ form.profile.label(class="form-control-label") }}
+							{{ form.profile(class="form-control form-control-sm") }}
+						</div>
+						<div class="form-group">
+							{{ form.role.label(class="form-control-label") }}
+							{{ form.role(class="form-control form-control-sm") }}
+						</div>
+						<div class="form-group">
+							{{ form.month.label(class="form-control-label") }}
+							{{ form.month(class="form-control form-control-sm") }}
+                            {{ form.day.label(class="form-control-label") }}
+							{{ form.day(class="form-control form-control-sm") }}
+                        </div>
+						<button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>
+					

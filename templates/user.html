@@ -74,6 +74,8 @@
 							  padding: 8px;
 							}
 							</style>							
+						<!-- Przycisk twoich drużyn -->
+						<a href="{{ url_for('yourteams') }}" class="btn btn-primary btn-lg">Your Clash Teams</a>
 						<!-- Lista dodanych profili -->
 						<div class="account-info">
 							<label for="profiles"><h2>Profiles</h2></label>
@@ -108,6 +110,15 @@
             				<span class="flash-message">{{ message }}</span>
         				{% endfor %}
     				{% endif %}
+					{% with messages = get_flashed_messages() %}
+						{% if messages %}
+							<div class="alert alert-danger">
+								{% for message in messages %}
+									<p>{{ message }}</p>
+								{% endfor %}
+							</div>
+						{% endif %}
+					{% endwith %}
 					<form method="POST" action="{{ url_for('create_profile', username=user.username) }}">
 						{{ form.hidden_tag() }}
 						<div class="form-group">
@@ -131,15 +142,6 @@
 							{{ form.alternative_role(class="form-control form-control-sm") }}
 						</div>
 						<button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
-						{% with messages = get_flashed_messages() %}
-							{% if messages %}
-								<div class="alert alert-danger">
-									{% for message in messages %}
-										<p>{{ message }}</p>
-									{% endfor %}
-								</div>
-							{% endif %}
-						{% endwith %}
 					</form>
 				</div>
 			</div>

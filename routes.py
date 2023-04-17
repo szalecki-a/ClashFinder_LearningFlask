@@ -1,7 +1,7 @@
 from app import app, db, login
 from flask import request, render_template, flash, redirect, url_for
-from models import User, Profile, ClashTeam, ReportPlayer
-from forms import RegistrationForm, LoginForm, ProfileForm, SearchingTeam, SendReport
+from models import User, Profile, ClashTeam, ReportPlayer, CreatingTeam
+from forms import RegistrationForm, LoginForm, ProfileForm, SearchingTeam, SendReport,  month_dict
 from werkzeug.urls import url_parse
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 
@@ -52,7 +52,6 @@ def login():
     return render_template('login.html', form=form)
 
 
-#@app.route('/user', defaults={'username': None}, methods=['GET', 'POST'])
 @app.route('/user/<username>', methods=['GET', 'POST'])
 @login_required
 def user(username):
@@ -113,15 +112,66 @@ def create_profile(username):
     return redirect(url_for('user', username=user.username))
 
 
-'''
-@app.route('/user/<username>/profiles',methods=['GET', 'POST'])
+@app.route('/user/<username>/teams', methods=['GET', 'POST'])
 @login_required
-def profiles(username):
-	user = current_user
-	user = User.query.filter_by(username=user.username).first_or_404()
-	profiles = Profile.query.filter_by(user_id=user.id)
-	return render_template('profile.html', user = user, profiles=profiles)
-'''
+def yourteams(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    profiles = Profile.query.filter_by(user_id=user.id).all()
+    if len(profiles) == 0:
+        profiles = []
+    your_clash_teams = []
+    for profile in profiles:
+        profile_teams = ClashTeam.query.filter_by(host_id=profile.id).all()
+        if profile_teams:
+            your_clash_teams.extend(profile_teams)
+    form = CreatingTeam()
+    return render_template('yourteams.html', your_clash_teams=your_clash_teams, form=form, user=user)
+
+
+@app.route('/user/<username>/create_team', methods=['GET', 'POST'])
+@login_required
+def create_team(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    user_profiles = Profile.query.filter_by(user_id=user.id).all()
+    user_teams = []
+    for profile in user_profiles:
+        teams = ClashTeam.query.filter_by(host_id=profile.id).all()
+        user_teams.extend(teams)
+    form = CreatingTeam()
+    if form.validate_on_submit():
+        profile_id = form.data['profile'].id
+        game_date = datetime.datetime(year=datetime.datetime.now().year, month=month_dict[form.month.data], day=form.day.data)
+        # for team in user_teams:
+        #     if game_date in team.clash_date:
+        #         flash('A profile with this nickname already exists on this server.')
+        # if existing_profile is not None:
+        #     flash('A profile with this nickname already exists on this server.')
+        # else:
+        profile_division = form.data['profile'].division
+        new_team = ClashTeam(
+            host_id = profile_id,
+            clash_date = game_date,
+            division = profile_division,            
+        )
+        if form.role.data == 'Toplane':
+            new_team.add_top(form.data['profile'].nickname)
+        elif form.role.data == 'Jungle':
+            new_team.add_jungle(form.data['profile'].nickname)
+        elif form.role.data == 'Midlane':
+            new_team.add_midlane(form.data['profile'].nickname)
+        elif form.role.data == 'Bottom':
+            new_team.add_adcarry(form.data['profile'].nickname)
+        else:
+            new_team.add_support(form.data['profile'].nickname)
+        db.session.add(new_team)
+        db.session.commit()
+        flash('Your Team has been created successfully.')
+    return redirect(url_for('yourteams', username=user.username))
+
+
+
+
+
 
 
 @app.route('/logout', methods=['GET', 'POST'])

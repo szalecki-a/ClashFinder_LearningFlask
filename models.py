@@ -35,6 +35,7 @@ class Profile(UserMixin, db.Model):
     best_position = db.Column(db.String(20), index=True)
     alternative_position = db.Column(db.String(20), index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    clash_teams = db.relationship('ClashTeam', backref='host', lazy='dynamic')
     reported = db.relationship('ReportPlayer', backref='Reported', lazy='dynamic',
                               cascade="all, delete, delete-orphan")  # powiązanie z reportowanym profilem
 
@@ -51,25 +52,28 @@ class Profile(UserMixin, db.Model):
 # tworzenie drużyny
 class ClashTeam(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    clash_date = db.Column(db.DateTime, nullable=False)
-    division = db.Column(db.String(64), index=True)
-    toplane = db.Column(db.String(64), index=True)
-    jungle = db.Column(db.String(64), index=True)
-    midlane = db.Column(db.String(64), index=True)
-    adcarry = db.Column(db.String(64), index=True)
-    support = db.Column(db.String(64), index=True)
+    clash_date = db.Column(db.DateTime, nullable=False, default=None)
+    division = db.Column(db.String(64), index=True, default=None)
+    toplane = db.Column(db.String(64), index=True, default=None)
+    jungle = db.Column(db.String(64), index=True, default=None)
+    midlane = db.Column(db.String(64), index=True, default=None)
+    adcarry = db.Column(db.String(64), index=True, default=None)
+    support = db.Column(db.String(64), index=True, default=None)
+    host_id = db.Column(db.Integer, db.ForeignKey('profile.id'))
 
-    def __init__(self, role, clash_date):
-        self.clash_date = clash_date
-        self.toplane = None if role != "toplane" else Profile.nickname
-        self.jungle = None if role != "jungle" else Profile.nickname
-        self.midlane = None if role != "midlane" else Profile.nickname
-        self.adcarry = None if role != "adcarry" else Profile.nickname
-        self.support = None if role != "support" else Profile.nickname
-        # if datetime.now() < self.clash_date:
-        # self.clash_date = clash_date
-        # else:
-        # raise Exception("Pick correct date")
+
+    # def __init__(self, role, clash_date=None):
+    #     self.clash_date = clash_date
+    #     self.toplane = None if role != "toplane" else Profile.nickname
+    #     self.jungle = None if role != "jungle" else Profile.nickname
+    #     self.midlane = None if role != "midlane" else Profile.nickname
+    #     self.adcarry = None if role != "adcarry" else Profile.nickname
+    #     self.support = None if role != "support" else Profile.nickname
+    #     if clash_date != None:
+    #         if datetime.now() < self.clash_date:
+    #             self.clash_date = clash_date
+    #         else:
+    #             raise Exception("Pick correct date")
 
     def add_top(self, top_name):
         if self.toplane is None:

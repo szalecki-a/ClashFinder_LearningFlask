@@ -13,7 +13,7 @@ months = [(1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'), (5, 'May'
           (7, 'July'), (8, 'August'), (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')]
 months_days = {'January': 31, 'February': 28, 'March': 31, 'April': 30, 'May': 31, 'June': 30,
                'July': 31, 'August': 31, 'September': 30, 'October': 31, 'November': 30, 'December': 31}
-
+month_dict = {month_name: month_num for month_num, month_name in months}
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -70,22 +70,21 @@ class SearchingTeam(FlaskForm):
                                 for p in Profile.query.filter_by(user_id=user_id)]
 
 
-'''
-#
+
 class CreatingTeam(FlaskForm):
-    profile = SelectField('Profile', coerce=int, validators=[DataRequired()])
-    role = SelectField('Select Role', choices=positions)
+    profile = SelectField('Profile', validators=[DataRequired()], choices=[])
+    role = SelectField('Select Role', validators=[DataRequired()], choices=positions)
     month = SelectField('Month', choices=months)
-    day_options = [(i, str(i)) for i in range(1, 32)]  # lista opcji od 1 do 31
+    day_options = [(i, str(i)) for i in range(1, 32)]
     day = SelectField('Day', choices=day_options)
     submit = SubmitField('Create Team')
 
     def __init__(self, user_id, *args, **kwargs):
         super(CreatingTeam, self).__init__(*args, **kwargs)
         self.profile.choices = [(p.id, p.name) for p in Profile.query.filter_by(user_id=user_id)]
+
+
 '''
-
-
 # wysyłanie raportów
 class SendReport(FlaskForm):
     title = StringField('Reason for reporting', validators=[DataRequired()])
@@ -93,7 +92,7 @@ class SendReport(FlaskForm):
     submit = SubmitField('Send Report')
 
 
-'''class DestinationForm(FlaskForm):
+class DestinationForm(FlaskForm):
     city = StringField('city')
     country = StringField('country')
     description = StringField('description')
@@ -107,4 +106,5 @@ class SendReport(FlaskForm):
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
-            raise ValidationError('Please use a different email address.')'''
+            raise ValidationError('Please use a different email address.')
+'''
