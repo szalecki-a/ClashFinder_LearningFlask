@@ -23,7 +23,7 @@
 					<a class="nav-link" href="#">Find Teammates</a>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link" href="{{ url_for('findteam') }}">Find Team</a>
+					<a class="nav-link" href="#">Find Team</a>
 				</li>
 				<li class="nav-item">
 					<a class="nav-link" href="#">About</a>
@@ -44,11 +44,45 @@
 				{% endif %}
 			</ul>
 		</nav>
-        <!-- teams info -->
+        <!-- searching teams bar -->
         <div class="container">
             <div class="row">
                 <div class="col-sm-6">
-                    <h2>Your Clash Teams</h2>
+					<h2>Find Clash Team</h2>
+					<form method="POST" action="{{ url_for('findteam') }}">
+						{{ form.hidden_tag() }}
+						<div class="row">
+							<div class="col-md-3">
+							  {{ form.profile.label(class="form-control-label") }}
+							  {{ form.profile(class="form-control form-control-sm") }}
+							</div>
+							<div class="col-md-3">
+							  {{ form.role.label(class="form-control-label") }}
+							  {{ form.role(class="form-control form-control-sm") }}
+							</div>
+							<div class="col-md-3">
+							  {{ form.division.label(class="form-control-label") }}
+							  {{ form.division(class="form-control form-control-sm") }}
+							</div>
+							<button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+							<br>
+						</div>
+					</form>
+					{% if flash %}
+        				{% for message in flash %}
+            				<span class="flash-message">{{ message }}</span>
+        				{% endfor %}
+    				{% endif %}
+					{% with messages = get_flashed_messages() %}
+						{% if messages %}
+							<div class="alert alert-danger">
+								{% for message in messages %}
+									<p>{{ message }}</p>
+								{% endfor %}
+							</div>
+						{% endif %}
+					{% endwith %}
+                    <h2>Clash Teams</h2>
 						<style>
 							table {
 							  border-collapse: collapse;
@@ -69,13 +103,13 @@
 							}
 							</style>							
 						<!-- Lista dodanych profili -->
-						<div class="teams-info">
-							{% if your_clash_teams %}
+						<div class="clash-available-teams">
+							{% if clash_teams %}
                             <table>
                                 <thead>
                                     <tr>
                                         <th><strong>Lp.</strong></th>
-										<th><strong>Server</strong></th>
+										<th><strong>SERVER</strong></th>
                                         <th><strong>TOPLANE</strong></th>
                                         <th><strong>JUNGLE</strong></th>
                                         <th><strong>MIDLANE</strong></th>
@@ -86,10 +120,10 @@
                                     </tr>
                                 </thead>
 								<tbody>
-									{% for team in your_clash_teams %}
+									{% for team in clash_teams %}
 									<tr>
 										<td>{{ loop.index }}</td>
-										<td>{{ team.host.server }}</td>
+										<td>{{ team.host.server or '' }}</td>
 										<td>
 											{% if team.toplane %}
 												<a href="#{{ team.toplane }}">{{ team.toplane }}</a>
@@ -131,46 +165,10 @@
 									{% endfor %}
 								</tbody>
                             </table>
-                            {% else %}
-                            <p>Currently  you do not belong to any Clash Team.</p>
+							{% else %}
+                            <p>There are currently no teams meeting your requirements.</p>
                             {% endif %}
 						</div>	
-                        <!-- Przycisk do strony z wyszukiwaniem druzyn -->
-						<a href="{{ url_for('findteam') }}" class="btn btn-primary btn-lg">Find Team</a>
-					<br>
-					<h2>Create your Clash Team</h2>
-					{% if flash %}
-        				{% for message in flash %}
-            				<span class="flash-message">{{ message }}</span>
-        				{% endfor %}
-    				{% endif %}
-					{% with messages = get_flashed_messages() %}
-						{% if messages %}
-							<div class="alert alert-danger">
-								{% for message in messages %}
-									<p>{{ message }}</p>
-								{% endfor %}
-							</div>
-						{% endif %}
-					{% endwith %}
-					<form method="POST" action="{{ url_for('create_team', username=user.username) }}">
-						{{ form.hidden_tag() }}
-						<div class="form-group">
-							{{ form.profile.label(class="form-control-label") }}
-							{{ form.profile(class="form-control form-control-sm") }}
-						</div>
-						<div class="form-group">
-							{{ form.role.label(class="form-control-label") }}
-							{{ form.role(class="form-control form-control-sm") }}
-						</div>
-						<div class="form-group">
-							{{ form.month.label(class="form-control-label") }}
-							{{ form.month(class="form-control form-control-sm") }}
-                            {{ form.day.label(class="form-control-label") }}
-							{{ form.day(class="form-control form-control-sm") }}
-                        </div>
-						<button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
-					</form>
 				</div>
 			</div>
 		</div>

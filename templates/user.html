@@ -28,11 +28,17 @@
 			</ul>
 			<!-- Right-aligned items -->
 			<ul class="navbar-nav ml-auto">
+				{% if current_user.is_authenticated %}
 				<li class="nav-item">
 					<form method="post" action="{{ url_for('logout') }}">
 						<button type="submit" class="btn btn-link nav-link">Logout</button>
 					</form>
 				</li>
+				{% else %}
+				<li class="nav-item">
+					<a class="nav-link" href="{{ url_for('login') }}">Login</a>
+				</li>
+				{% endif %}
 			</ul>
 		</nav>
         <!-- account info -->
@@ -148,4 +154,3 @@
 		</div>
 	</body>
 </html>
-					

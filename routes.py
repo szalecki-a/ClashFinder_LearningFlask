@@ -4,11 +4,9 @@ from models import User, Profile, ClashTeam, ReportPlayer
 from forms import RegistrationForm, LoginForm, ProfileForm, SearchingTeam, CreatingTeam, month_dict
 from werkzeug.urls import url_parse
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
+from sqlalchemy import or_
 from datetime import datetime
 
-# stworzyć model strony z profilem (w zawartości nazwa konta, email, lista profili)
-# stworzyć model strony profilu (serwer, dywizja, preferowana pozycja)
-# stworzyć model strony z tworzeniem profilu, może warto stworzyć to poniżej listy z profilami
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -17,9 +15,9 @@ def index():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    # sprawdzam czy current_user jest zalogowany, jeżeli jest przekierowywujego na stronę startową
+    # sprawdzam czy current_user jest zalogowany, TRUE przekierowywuje na stronę użytkownika
     if current_user.is_authenticated:
-        return redirect(url_for('index'))
+        return redirect(url_for('user', username=current_user.username))
     form = RegistrationForm()
     if form.validate_on_submit():
         user = User(username=form.username.data, email=form.email.data)
@@ -33,7 +31,7 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # sprawdzam czy current_user jest zalogowany, jeżeli jest przekierowywuję go na stronę startową
+    # sprawdzam czy current_user jest zalogowany, TRUE przekierowywuje na stronę użytkownika
     if current_user.is_authenticated:
         return redirect(url_for('user', username=current_user.username))
     form = LoginForm()
@@ -51,6 +49,7 @@ def login():
     return render_template('login.html', form=form)
 
 
+# ścieżka strony użytkownika, która pokazuje dane konta, profile oraz pozwala tworzyć profile
 @app.route('/user/<username>', methods=['GET', 'POST'])
 @login_required
 def user(username):
@@ -59,33 +58,10 @@ def user(username):
     if len(profiles) == 0:
         profiles = []
     form = ProfileForm()
-    # if form.validate_on_submit():
-    #     existing_profile = Profile.query.filter_by(nickname=form.nickname.data, server=form.server.data).first()
-    #     if existing_profile is not None:
-    #         print("profil istnieje")
-    #         flash('A profile with this nickname already exists on this server.')
-    #     else:
-    #         print("tworze profil")
-    #         new_profile = Profile(
-    #             nickname=form.nickname.data, 
-    #             server=form.server.data, 
-    #             division=form.division.data,
-    #             best_position=form.pref_role.data, 
-    #             alternative_position=form.alternative_role.data, 
-    #             user_id=current_user.id
-    #         )
-    #         db.session.add(new_profile)
-    #         print("dodaje profil")
-    #         db.session.commit()
-    #         flash('Your profile has been created successfully.')
-
-    #         # Przekierowanie użytkownika na stronę z listą profili po dodaniu nowego profilu
-    #         return redirect(url_for('user', username=current_user.username))
-    # else:
-    #     print("validacja niepoprawna")
     return render_template('user.html', profiles=profiles, form=form, user=current_user, title='User Profile')
 
 
+# ścieżka pozwalająca tworzyć profile i przekierowywuje spowrotem na stronę użytkownika
 @app.route('/user/<username>/create_profile', methods=['GET', 'POST'])
 @login_required
 def create_profile(username):
@@ -96,7 +72,6 @@ def create_profile(username):
         if existing_profile is not None:
             flash('A profile with this nickname already exists on this server.')
         else:
-            print("dodaje profil")
             new_profile = Profile(
                 nickname=form.nickname.data, 
                 server=form.server.data, 
@@ -111,6 +86,8 @@ def create_profile(username):
     return redirect(url_for('user', username=user.username))
 
 
+# ścieżka drużyn stworzonych przez użytkownika, 
+#warto rozszerzyć ścieżkę o listę drużyn, których jest członkiem, ale to po stworzeniu mechanizmu dołączania do drużyn
 @app.route('/user/<username>/teams', methods=['GET', 'POST'])
 @login_required
 def yourteams(username):
@@ -126,7 +103,8 @@ def yourteams(username):
     form = CreatingTeam(user_id = user.id)
     return render_template('yourteams.html', your_clash_teams=your_clash_teams, form=form, user=user)
 
-
+# ścieżka pozwalająca tworzyć drużyny i przekierowywuje spowrotem na stronę drużyn użytkownika
+# rozszerzyć o sprawdzanie daty tworzenia drużyny, może dodać pole z rokiem...
 @app.route('/user/<username>/create_team', methods=['GET', 'POST'])
 @login_required
 def create_team(username):
@@ -167,11 +145,41 @@ def create_team(username):
     return redirect(url_for('yourteams', username=user.username))
 
 
+#ścieżka pozwalająca wyszukać drużyny
+@app.route('/findteam', methods=['GET', 'POST'])
+@login_required
+def findteam():
+    user = User.query.filter_by(username=current_user.username).first_or_404()
+    clash_teams = ClashTeam.query.filter(or_(ClashTeam.toplane==None, ClashTeam.jungle==None, ClashTeam.midlane==None, ClashTeam.adcarry==None, ClashTeam.support==None)).order_by(ClashTeam.clash_date).all()
+    if len(clash_teams) == 0:
+        clash_teams = []
+    form = SearchingTeam(user_id = user.id)
+    if form.validate_on_submit():
+        print(form.division.data)
+        if form.role.data == 'Toplane':
+            clash_teams = ClashTeam.query.join(Profile).filter(Profile.division == form.division.data, ClashTeam.toplane.is_(None)).order_by(ClashTeam.clash_date).all()
+        elif form.role.data == 'Jungle':
+          clash_teams = ClashTeam.query.join(Profile).filter(Profile.division == form.division.data, ClashTeam.jungle.is_(None)).order_by(ClashTeam.clash_date).all()
+        elif form.role.data == 'Midlane':
+          clash_teams = ClashTeam.query.join(Profile).filter(Profile.division == form.division.data, ClashTeam.midlane.is_(None)).order_by(ClashTeam.clash_date).all()
+        elif form.role.data == 'Bottom':
+          clash_teams = ClashTeam.query.join(Profile).filter(Profile.division == form.division.data, ClashTeam.adcarry.is_(None)).order_by(ClashTeam.clash_date).all()
+        else:
+          clash_teams = ClashTeam.query.join(Profile).filter(Profile.division == form.division.data, ClashTeam.support.is_(None)).order_by(ClashTeam.clash_date).all()
+    return render_template('findteam.html', clash_teams=clash_teams, form=form, user=user)
 
 
 
 
 
+
+
+
+
+
+
+
+#ścieżka wylogowywująca użytkownika
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
 def logout():

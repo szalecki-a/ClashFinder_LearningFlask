@@ -4,13 +4,13 @@ from app import db, login
 from flask_login import LoginManager, UserMixin, login_required
 
 
-# konto użytkownika
+# klasa z kontem użytkownika
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True, unique=True)
     email = db.Column(db.String(120), unique=True, index=True)
     password_hash = db.Column(db.String(128))
-    profiles = db.relationship('Profile', backref='Player', lazy='dynamic',
+    profiles = db.relationship('Profile', backref='User', lazy='dynamic',
                                cascade="all, delete, delete-orphan")  # powiązanie z kontem uzytkownika
     reports = db.relationship('ReportPlayer', backref='Report', lazy='dynamic',
                               cascade="all, delete, delete-orphan")  # powiązanie z kontem uzytkownika
@@ -24,9 +24,8 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return '<User {}>'.format(self.username)
 
-# profil uzytkownika
 
-
+# klasa z profilem, przypisywanym do konta użytkownika, w relacji jeden do wielu (1 uzytkownik wiele profili)
 class Profile(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nickname = db.Column(db.String(64), index=True, unique=True)
@@ -39,17 +38,9 @@ class Profile(UserMixin, db.Model):
     reported = db.relationship('ReportPlayer', backref='Reported', lazy='dynamic',
                               cascade="all, delete, delete-orphan")  # powiązanie z reportowanym profilem
 
-    # dodać metodę repr, która odeśle na serwer np nexusblitz..
-    def __repr__(self):
-        pass
-        # return '<User {}>'.format(self.username)
 
 
-# stworzyć klasy - tworzenie drużyn - na konkretną datę oraz godzinę, która umożliwia wysyłanie zgłoszeń do dołączenia lub zapraszanie
-    # klasa stworzona, wysyłanie zaproszeń lub dołączanie za pomocą formularza
-# czyli trzeba stworzyć formularze do tworzenia spotkań oraz do wystawiania "siebie" na rynku
-
-# tworzenie drużyny
+# Klasa przedstawiająca tworzenie dużyny Clash
 class ClashTeam(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     clash_date = db.Column(db.DateTime, nullable=False, default=None)
