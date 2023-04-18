@@ -75,7 +75,7 @@
 							}
 							</style>							
 						<!-- Przycisk twoich drużyn -->
-						<a href="{{ url_for('yourteams') }}" class="btn btn-primary btn-lg">Your Clash Teams</a>
+						<a href="{{ url_for('yourteams', username=user.username) }}" class="btn btn-primary btn-lg">Your Clash Teams</a>
 						<!-- Lista dodanych profili -->
 						<div class="account-info">
 							<label for="profiles"><h2>Profiles</h2></label>

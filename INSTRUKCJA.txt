@@ -24,6 +24,6 @@ git init
 -przy każdej zmianie:
 git add .
 git commit -m "komentarz"
-git push heroku master
+git push (heroku master)
 
 heroku open do otworzenia strony

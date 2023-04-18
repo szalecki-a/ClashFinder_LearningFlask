@@ -35,7 +35,7 @@ class Profile(UserMixin, db.Model):
     best_position = db.Column(db.String(20), index=True)
     alternative_position = db.Column(db.String(20), index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    clash_teams = db.relationship('ClashTeam', backref='host', lazy='dynamic')
+    clash_team = db.relationship('ClashTeam', backref='host', lazy='dynamic')
     reported = db.relationship('ReportPlayer', backref='Reported', lazy='dynamic',
                               cascade="all, delete, delete-orphan")  # powiązanie z reportowanym profilem
 

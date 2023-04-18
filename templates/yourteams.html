@@ -45,6 +45,7 @@
 							  border-collapse: collapse;
 							  font-size: 0.9em;
 							  border: 1px solid #ddd;
+							  margin-bottom: 10px;
 							}
 							
 							th {
@@ -75,27 +76,58 @@
                                         <th><strong>HOST DIVISION</strong></th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    {% for team in your_clash_teams %}
-                                    <tr>
-                                        <td>{{ loop.index }}</td>
-                                        <td><a href="{% if profile.toplane %}/x/{{ profile.toplane }}{% else %}#{% endif %}">{{ profile.toplane or 'join' }}</a></td>
-                                        <td><a href="{% if profile.jungle %}/x/{{ profile.jungle }}{% else %}#{% endif %}">{{ profile.jungle or 'join' }}</a></td>
-                                        <td><a href="{% if profile.midlane %}/x/{{ profile.midlane }}{% else %}#{% endif %}">{{ profile.midlane or 'join' }}</a></td>
-                                        <td><a href="{% if profile.adcarry %}/x/{{ profile.adcarry }}{% else %}#{% endif %}">{{ profile.adcarry or 'join' }}</a></td>
-                                        <td><a href="{% if profile.support %}/x/{{ profile.support }}{% else %}#{% endif %}">{{ profile.support or 'join' }}</a></td>
-                                        <td>{{ profile.clash_date or '' }}</td>
-                                        <td>{{ profile.division or '' }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
+								<tbody>
+									{% for team in your_clash_teams %}
+									<tr>
+										<td>{{ loop.index }}</td>
+										<td>
+											{% if team.toplane %}
+												<a href="#{{ team.toplane }}">{{ team.toplane }}</a>
+											{% else %}
+												<a href="#">join</a>
+											{% endif %}
+										</td>
+										<td>
+											{% if team.jungle %}
+												<a href="#{{ team.jungle }}">{{ team.jungle }}</a>
+											{% else %}
+												<a href="#">join</a>
+											{% endif %}
+										</td>
+										<td>
+											{% if team.midlane %}
+												<a href="#{{ team.midlane }}">{{ team.midlane }}</a>
+											{% else %}
+												<a href="#">join</a>
+											{% endif %}
+										</td>
+										<td>
+											{% if team.adcarry %}
+												<a href="#{{ team.adcarry }}">{{ team.adcarry }}</a>
+											{% else %}
+												<a href="#">join</a>
+											{% endif %}
+										</td>
+										<td>
+											{% if team.support %}
+												<a href="#{{ team.support }}">{{ team.support }}</a>
+											{% else %}
+												<a href="#">join</a>
+											{% endif %}
+										</td>
+										<td>{{ team.clash_date or '' }}</td>
+										<td>{{ team.division or '' }}</td>
+									</tr>
+									{% endfor %}
+								</tbody>
                             </table>
                             {% else %}
                             <p>Currently  you do not belong to any Clash Team.</p>
                             {% endif %}
 						</div>	
                         <!-- Przycisk do strony z wyszukiwaniem druzyn -->
-						<a href="{{ url_for('X') }}" class="btn btn-primary btn-lg">Find a Team</a>
+						<a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">Find Team</a>
+					<br>
 					<h2>Create your Clash Team</h2>
 					{% if flash %}
         				{% for message in flash %}

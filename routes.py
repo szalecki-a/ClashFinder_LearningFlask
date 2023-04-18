@@ -1,10 +1,10 @@
 from app import app, db, login
 from flask import request, render_template, flash, redirect, url_for
-from models import User, Profile, ClashTeam, ReportPlayer, CreatingTeam
-from forms import RegistrationForm, LoginForm, ProfileForm, SearchingTeam, SendReport,  month_dict
+from models import User, Profile, ClashTeam, ReportPlayer
+from forms import RegistrationForm, LoginForm, ProfileForm, SearchingTeam, CreatingTeam, month_dict
 from werkzeug.urls import url_parse
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
-
+from datetime import datetime
 
 # stworzyć model strony z profilem (w zawartości nazwa konta, email, lista profili)
 # stworzyć model strony profilu (serwer, dywizja, preferowana pozycja)
@@ -36,7 +36,6 @@ def login():
     # sprawdzam czy current_user jest zalogowany, jeżeli jest przekierowywuję go na stronę startową
     if current_user.is_authenticated:
         return redirect(url_for('user', username=current_user.username))
-
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
@@ -124,7 +123,7 @@ def yourteams(username):
         profile_teams = ClashTeam.query.filter_by(host_id=profile.id).all()
         if profile_teams:
             your_clash_teams.extend(profile_teams)
-    form = CreatingTeam()
+    form = CreatingTeam(user_id = user.id)
     return render_template('yourteams.html', your_clash_teams=your_clash_teams, form=form, user=user)
 
 
@@ -137,32 +136,31 @@ def create_team(username):
     for profile in user_profiles:
         teams = ClashTeam.query.filter_by(host_id=profile.id).all()
         user_teams.extend(teams)
-    form = CreatingTeam()
+    form = CreatingTeam(user_id = user.id)
     if form.validate_on_submit():
-        profile_id = form.data['profile'].id
-        game_date = datetime.datetime(year=datetime.datetime.now().year, month=month_dict[form.month.data], day=form.day.data)
+        current_profile = Profile.query.filter_by(nickname=form.profile.data, user_id = user.id).first()
+        game_date = datetime(year=datetime.now().year, month=int(form.month.data), day=int(form.day.data))
         # for team in user_teams:
         #     if game_date in team.clash_date:
         #         flash('A profile with this nickname already exists on this server.')
         # if existing_profile is not None:
         #     flash('A profile with this nickname already exists on this server.')
         # else:
-        profile_division = form.data['profile'].division
         new_team = ClashTeam(
-            host_id = profile_id,
+            host_id = current_profile.id,
             clash_date = game_date,
-            division = profile_division,            
+            division = current_profile.division,            
         )
         if form.role.data == 'Toplane':
-            new_team.add_top(form.data['profile'].nickname)
+            new_team.add_top(current_profile.nickname)
         elif form.role.data == 'Jungle':
-            new_team.add_jungle(form.data['profile'].nickname)
+            new_team.add_jungle(current_profile.nickname)
         elif form.role.data == 'Midlane':
-            new_team.add_midlane(form.data['profile'].nickname)
+            new_team.add_midlane(current_profile.nickname)
         elif form.role.data == 'Bottom':
-            new_team.add_adcarry(form.data['profile'].nickname)
+            new_team.add_adcarry(current_profile.nickname)
         else:
-            new_team.add_support(form.data['profile'].nickname)
+            new_team.add_support(current_profile.nickname)
         db.session.add(new_team)
         db.session.commit()
         flash('Your Team has been created successfully.')

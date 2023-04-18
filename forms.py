@@ -14,6 +14,7 @@ months = [(1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'), (5, 'May'
 months_days = {'January': 31, 'February': 28, 'March': 31, 'April': 30, 'May': 31, 'June': 30,
                'July': 31, 'August': 31, 'September': 30, 'October': 31, 'November': 30, 'December': 31}
 month_dict = {month_name: month_num for month_num, month_name in months}
+month_dict2 = {month_num: month_name for month_num, month_name in months}
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -75,13 +76,13 @@ class CreatingTeam(FlaskForm):
     profile = SelectField('Profile', validators=[DataRequired()], choices=[])
     role = SelectField('Select Role', validators=[DataRequired()], choices=positions)
     month = SelectField('Month', choices=months)
-    day_options = [(i, str(i)) for i in range(1, 32)]
+    day_options = [(i, i) for i in range(1, 32)]
     day = SelectField('Day', choices=day_options)
     submit = SubmitField('Create Team')
 
     def __init__(self, user_id, *args, **kwargs):
         super(CreatingTeam, self).__init__(*args, **kwargs)
-        self.profile.choices = [(p.id, p.name) for p in Profile.query.filter_by(user_id=user_id)]
+        self.profile.choices = [(p.nickname) for p in Profile.query.filter_by(user_id=user_id)]
 
 
 '''
