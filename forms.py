@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, SelectMultipleField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from models import Profile
 
@@ -7,7 +7,7 @@ servers = [('North America', 'NA'), ('West Europe', 'EUW'),
            ('North and Eeat Europe', 'EUNE')]
 positions = [(None, ''), ('Toplane', 'Toplane'), ('Jungle', 'Jungle'),
              ('Midlane', 'Midlane'), ('Bottom', 'Bottom'), ('Support', 'Support')]
-divisions = [('Iron', 'Iron'), ('Bronze', 'Bronze'), ('Silver', 'Silver'), ('Gold','Gold'), ('Platinum', 'Platinum'), 
+divisions = [(None, ''), ('Iron', 'Iron'), ('Bronze', 'Bronze'), ('Silver', 'Silver'), ('Gold','Gold'), ('Platinum', 'Platinum'), 
              ('Diamond', 'Diamond'), ('Master', 'Master'), ('Grandmaster', 'Grandmaster'), ('Challenger', 'Challenger')]
 months = [(1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'), (5, 'May'), (6, 'June'),
           (7, 'July'), (8, 'August'), (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')]
@@ -55,6 +55,18 @@ class ProfileForm(FlaskForm):
     submit = SubmitField('Add Profile')
 
 
+class CreatingTeam(FlaskForm):
+    profile = SelectField('Profile', validators=[DataRequired()], choices=[])
+    role = SelectField('Select Role', validators=[DataRequired()], choices=positions)
+    month = SelectField('Month', choices=months)
+    day_options = [(i, i) for i in range(1, 32)]
+    day = SelectField('Day', choices=day_options)
+    submit = SubmitField('Create Team')
+
+    def __init__(self, user_id, *args, **kwargs):
+        super(CreatingTeam, self).__init__(*args, **kwargs)
+        self.profile.choices = [(p.nickname) for p in Profile.query.filter_by(user_id=user_id)]
+
 
 # klasa wyszukiwania do utworzonych drużyn
 class SearchingTeam(FlaskForm):
@@ -68,18 +80,16 @@ class SearchingTeam(FlaskForm):
         self.profile.choices = [(p.nickname) for p in Profile.query.filter_by(user_id=user_id)]
 
 
-
-class CreatingTeam(FlaskForm):
-    profile = SelectField('Profile', validators=[DataRequired()], choices=[])
-    role = SelectField('Select Role', validators=[DataRequired()], choices=positions)
-    month = SelectField('Month', choices=months)
-    day_options = [(i, i) for i in range(1, 32)]
-    day = SelectField('Day', choices=day_options)
-    submit = SubmitField('Create Team')
+# klasa wyszukiwania członków drużyny
+class SearchingProfile(FlaskForm):
+    profile = SelectField('For Profile', validators=[DataRequired()], choices=[], default=None)
+    divisions = SelectField('Player Division', choices=divisions)
+    role = SelectField('For Positions', choices=positions)
+    submit = SubmitField('Search')
 
     def __init__(self, user_id, *args, **kwargs):
-        super(CreatingTeam, self).__init__(*args, **kwargs)
-        self.profile.choices = [(p.nickname) for p in Profile.query.filter_by(user_id=user_id)]
+        super(SearchingProfile, self).__init__(*args, **kwargs)
+        self.profile.choices = [(p.id, p.nickname) for p in Profile.query.filter_by(user_id=user_id)]
 
 
 '''

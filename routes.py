@@ -1,7 +1,7 @@
 from app import app, db, login
 from flask import request, render_template, flash, redirect, url_for
 from models import User, Profile, ClashTeam, ReportPlayer
-from forms import RegistrationForm, LoginForm, ProfileForm, SearchingTeam, CreatingTeam, month_dict
+from forms import RegistrationForm, LoginForm, ProfileForm, SearchingTeam, CreatingTeam, SearchingProfile, positions, divisions
 from werkzeug.urls import url_parse
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from sqlalchemy import or_
@@ -155,25 +155,47 @@ def findteam():
         clash_teams = []
     form = SearchingTeam(user_id = user.id)
     if form.validate_on_submit():
-        print(form.division.data)
-        if form.role.data == 'Toplane':
-            clash_teams = ClashTeam.query.join(Profile).filter(Profile.division == form.division.data, ClashTeam.toplane.is_(None)).order_by(ClashTeam.clash_date).all()
-        elif form.role.data == 'Jungle':
-          clash_teams = ClashTeam.query.join(Profile).filter(Profile.division == form.division.data, ClashTeam.jungle.is_(None)).order_by(ClashTeam.clash_date).all()
-        elif form.role.data == 'Midlane':
-          clash_teams = ClashTeam.query.join(Profile).filter(Profile.division == form.division.data, ClashTeam.midlane.is_(None)).order_by(ClashTeam.clash_date).all()
-        elif form.role.data == 'Bottom':
-          clash_teams = ClashTeam.query.join(Profile).filter(Profile.division == form.division.data, ClashTeam.adcarry.is_(None)).order_by(ClashTeam.clash_date).all()
+        if form.division.data=='None':
+            div = ['Iron', 'Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Master', 'Grandmaster', 'Challenger']
         else:
-          clash_teams = ClashTeam.query.join(Profile).filter(Profile.division == form.division.data, ClashTeam.support.is_(None)).order_by(ClashTeam.clash_date).all()
+            div = [form.division.data]
+        if form.role.data == 'Toplane':
+            clash_teams = ClashTeam.query.join(Profile).filter(Profile.division.in_(div), ClashTeam.toplane.is_(None)).order_by(ClashTeam.clash_date).all()
+        elif form.role.data == 'Jungle':
+          clash_teams = ClashTeam.query.join(Profile).filter(Profile.division.in_(div), ClashTeam.jungle.is_(None)).order_by(ClashTeam.clash_date).all()
+        elif form.role.data == 'Midlane':
+          clash_teams = ClashTeam.query.join(Profile).filter(Profile.division.in_(div), ClashTeam.midlane.is_(None)).order_by(ClashTeam.clash_date).all()
+        elif form.role.data == 'Bottom':
+          clash_teams = ClashTeam.query.join(Profile).filter(Profile.division.in_(div), ClashTeam.adcarry.is_(None)).order_by(ClashTeam.clash_date).all()
+        elif form.role.data == 'Support':
+          clash_teams = ClashTeam.query.join(Profile).filter(Profile.division.in_(div), ClashTeam.support.is_(None)).order_by(ClashTeam.clash_date).all()
+        else:
+            clash_teams = ClashTeam.query.join(Profile).filter(Profile.division.in_(div)).order_by(ClashTeam.clash_date).all()
     return render_template('findteam.html', clash_teams=clash_teams, form=form, user=user)
 
 
 
-
-
-
-
+#ścieżka pozwalająca wyszukać zawodników
+@app.route('/findteammates', methods=['GET', 'POST'])
+@login_required
+def findteammates():
+    user = User.query.filter_by(username=current_user.username).first_or_404()
+    find_teammates = Profile.query.all()
+    if len(find_teammates) == 0:
+        find_teammates = []
+    form = SearchingProfile(user_id = user.id)
+    if form.validate_on_submit():
+        current_profile = Profile.query.filter_by(id=form.profile.data).first_or_404()
+        if form.role.data == 'None':
+            roles = ['Toplane', 'Jungle', 'Midlane', 'Bottom', 'Support']
+        else:
+            roles = [form.role.data]
+        if form.divisions.data == 'None':
+            div = ['Iron', 'Bronze', 'Silver', 'Gold', 'Platinum', 'Diamond', 'Master', 'Grandmaster', 'Challenger']
+        else:
+            div = [form.divisions.data]   
+        find_teammates = Profile.query.filter(or_(Profile.best_position.in_(roles), Profile.alternative_position.in_(roles)), Profile.division.in_(div), Profile.server==current_profile.server)
+    return render_template('findteammates.html', find_teammates=find_teammates, form=form, user=user)
 
 
 

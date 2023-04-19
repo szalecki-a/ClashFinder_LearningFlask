@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Find Team</title>
+		<title>Find Teammates</title>
 		<!-- Ustawienie kodowania znaków na UTF-8. -->
 		<meta charset="utf-8">
 		<!-- Ustawienie skalowania widoku dla urządzeń mobilnych. -->
@@ -48,8 +48,8 @@
         <div class="container">
             <div class="row">
                 <div class="col-sm-6">
-					<h2>Find Clash Team</h2>
-					<form method="POST" action="{{ url_for('findteam') }}">
+					<h2>Find Your Teammates</h2>
+					<form method="POST" action="{{ url_for('findteammates') }}">
 						{{ form.hidden_tag() }}
 						<div class="row">
 							<div class="col-md-3">
@@ -61,12 +61,11 @@
 							  {{ form.role(class="form-control form-control-sm") }}
 							</div>
 							<div class="col-md-3">
-							  {{ form.division.label(class="form-control-label") }}
-							  {{ form.division(class="form-control form-control-sm") }}
+							  {{ form.divisions.label(class="form-control-label") }}
+							  {{ form.divisions(class="form-control form-control-sm") }}
 							</div>
-							<div class="col-md-3">
-								<button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
-							</div>
+							<button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+							<br>
 						</div>
 					</form>
 					{% if flash %}
@@ -83,7 +82,7 @@
 							</div>
 						{% endif %}
 					{% endwith %}
-                    <h2>Clash Teams</h2>
+                    <h2>Available Players</h2>
 						<style>
 							table {
 							  border-collapse: collapse;
@@ -105,69 +104,35 @@
 							</style>							
 						<!-- Lista dodanych profili -->
 						<div class="clash-available-teams">
-							{% if clash_teams %}
+							{% if find_teammates %}
                             <table>
                                 <thead>
                                     <tr>
                                         <th>Lp.</th>
-										<th>SERVER</th>
-                                        <th>TOPLANE</th>
-                                        <th>JUNGLE</th>
-                                        <th>MIDLANE</th>
-                                        <th>BOTTOM</th>
-                                        <th>SUPPORT</th>
-                                        <th>CLASH DATE</th>
-                                        <th>HOST DIVISION</th>
+										<th>NICKNAME</th>
+                                        <th>DIVISION</th>
+                                        <th>MAIN ROLE</th>
+                                        <th>SECONDARY POSITION</th>
+                                        <th>SERVER</th>
+										<th>INVITE</th>
                                     </tr>
                                 </thead>
 								<tbody>
-									{% for team in clash_teams %}
+									{% for teammate in find_teammates %}
 									<tr>
 										<td>{{ loop.index }}</td>
-										<td>{{ team.host.server or '' }}</td>
-										<td>
-											{% if team.toplane %}
-												<a href="#{{ team.toplane }}">{{ team.toplane }}</a>
-											{% else %}
-												<a href="#">join</a>
-											{% endif %}
-										</td>
-										<td>
-											{% if team.jungle %}
-												<a href="#{{ team.jungle }}">{{ team.jungle }}</a>
-											{% else %}
-												<a href="#">join</a>
-											{% endif %}
-										</td>
-										<td>
-											{% if team.midlane %}
-												<a href="#{{ team.midlane }}">{{ team.midlane }}</a>
-											{% else %}
-												<a href="#">join</a>
-											{% endif %}
-										</td>
-										<td>
-											{% if team.adcarry %}
-												<a href="#{{ team.adcarry }}">{{ team.adcarry }}</a>
-											{% else %}
-												<a href="#">join</a>
-											{% endif %}
-										</td>
-										<td>
-											{% if team.support %}
-												<a href="#{{ team.support }}">{{ team.support }}</a>
-											{% else %}
-												<a href="#">join</a>
-											{% endif %}
-										</td>
-										<td>{{ team.clash_date or '' }}</td>
-										<td>{{ team.division or '' }}</td>
+										<td><a href="#">{{ teammate.nickname }}</a></td>
+										<td>{{ teammate.division }}</td>
+										<td>{{ teammate.best_position }}</td>
+										<td>{{ teammate.alternative_position }}</td>
+										<td>{{ teammate.server }}</td>
+										<td><a href="#">Invite</a></td>
 									</tr>
 									{% endfor %}
 								</tbody>
                             </table>
 							{% else %}
-                            <p>There are currently no teams meeting your requirements.</p>
+                            <p>There are currently no players meeting your requirements.</p>
                             {% endif %}
 						</div>	
 				</div>
