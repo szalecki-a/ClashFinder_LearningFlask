@@ -1,0 +1,91 @@
+<!-- extend from "base.html" here -->
+{% extends "base.html" %}
+<!-- begin block content here -->
+{% block content %}
+        <!-- account info -->
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h2>Team #{{ team.id }}</h2>
+						<style>
+							table {
+							  border-collapse: collapse;
+							  font-size: 0.9em;
+							  border: 1px solid #ddd;
+							}
+							
+							th {
+							  border: 1px solid #ddd;
+							  padding: 8px;
+							  text-align: left;
+							}
+							
+							td {
+							  border: 1px solid #ddd;
+							  padding: 8px;
+							}
+							</style>							
+						<div class="account-info">
+							<label for="profiles"><h4>Team Info</h4></label>
+                            <table>
+                                <thead>
+                                    <tr>
+										<th><strong>Server</strong></th>
+                                        <th><strong>TOPLANE</strong></th>
+                                        <th><strong>JUNGLE</strong></th>
+                                        <th><strong>MIDLANE</strong></th>
+                                        <th><strong>BOTTOM</strong></th>
+                                        <th><strong>SUPPORT</strong></th>
+                                        <th><strong>CLASH DATE</strong></th>
+                                        <th><strong>HOST DIVISION</strong></th>
+                                    </tr>
+                                </thead>
+								<tbody>
+									<tr>
+										<td>{{ team.host.server }}</td>
+										<td>
+											{% if team.toplane %}
+												<a href="#{{ team.toplane }}">{{ team.toplane }}</a>
+											{% else %}
+												<a href="#">join</a>
+											{% endif %}
+										</td>
+										<td>
+											{% if team.jungle %}
+												<a href="#{{ team.jungle }}">{{ team.jungle }}</a>
+											{% else %}
+												<a href="#">join</a>
+											{% endif %}
+										</td>
+										<td>
+											{% if team.midlane %}
+												<a href="#{{ team.midlane }}">{{ team.midlane }}</a>
+											{% else %}
+												<a href="#">join</a>
+											{% endif %}
+										</td>
+										<td>
+											{% if team.adcarry %}
+												<a href="#{{ team.adcarry }}">{{ team.adcarry }}</a>
+											{% else %}
+												<a href="#">join</a>
+											{% endif %}
+										</td>
+										<td>
+											{% if team.support %}
+												<a href="#{{ team.support }}">{{ team.support }}</a>
+											{% else %}
+												<a href="#">join</a>
+											{% endif %}
+										</td>
+										<td>{{ team.clash_date}}</td>
+										<td>{{ team.division}}</td>
+									</tr>
+								</tbody>
+                            </table>
+						</div>						
+				</div>
+			</div>
+		</div>
+<!-- end block content here -->
+{% endblock %}

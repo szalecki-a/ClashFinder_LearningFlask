@@ -3,8 +3,8 @@ from wtforms import StringField, PasswordField, BooleanField, SubmitField, Selec
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from models import Profile
 
-servers = [('North America', 'NA'), ('West Europe', 'EUW'),
-           ('North and Eeat Europe', 'EUNE')]
+servers = [('NA', 'NA'), ('EUW', 'EUW'),
+           ('EUNE', 'EUNE')]
 positions = [(None, ''), ('Toplane', 'Toplane'), ('Jungle', 'Jungle'),
              ('Midlane', 'Midlane'), ('Bottom', 'Bottom'), ('Support', 'Support')]
 divisions = [(None, ''), ('Iron', 'Iron'), ('Bronze', 'Bronze'), ('Silver', 'Silver'), ('Gold','Gold'), ('Platinum', 'Platinum'), 
@@ -90,6 +90,36 @@ class SearchingProfile(FlaskForm):
     def __init__(self, user_id, *args, **kwargs):
         super(SearchingProfile, self).__init__(*args, **kwargs)
         self.profile.choices = [(p.id, p.nickname) for p in Profile.query.filter_by(user_id=user_id)]
+
+
+# klasa wyszukiwania członków drużyny
+class InvitePlayer(FlaskForm):
+    clashteam = SelectField('Clash Date', validators=[DataRequired()], choices=[], default=None)
+    role = SelectField('For Positions', choices=positions)
+    submit = SubmitField('Invite')
+
+    def __init__(self, user_profiles, *args, **kwargs):
+        super(InvitePlayer, self).__init__(*args, **kwargs)
+        self.clashteam.choices = [(p.id, f'{p.clash_date} - {p.host.server}') for p in user_profiles]
+
+
+class AnswerForm(FlaskForm):
+    answer = BooleanField('Akceptuję', validators=[DataRequired()])
+    accept_button = SubmitField('Accept')
+    reject_button = SubmitField('Reject')
+
+    def validate(self):
+        if not FlaskForm.validate(self):
+            return False
+
+        if self.accept_button.data:
+            self.accept.data = True
+        elif self.reject_button.data:
+            self.accept.data = False
+        else:
+            self.accept.errors.append('Musisz wybrać jedno z dwóch')
+
+        return True
 
 
 '''

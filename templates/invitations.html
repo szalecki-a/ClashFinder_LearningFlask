@@ -1,0 +1,39 @@
+<!-- extend from "base.html" here -->
+{% extends "base.html" %}
+<!-- begin block content here -->
+{% block content %}
+        <!-- searching teams bar -->
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+					<h2>Invite {{ inv_guest.nickname | title }}</h2>
+					<form method="POST" action="{{ url_for('sendinvitation', user_id=user.id, guest_id=inv_guest.id) }}">
+						{{ form.hidden_tag() }}
+						<div class="row">
+							<div class="col-md-3">
+							  {{ form.clashteam.label(class="form-control-label") }}
+							  {{ form.clashteam(class="form-control form-control-sm") }}
+							</div>
+							<div class="col-md-3">
+							  {{ form.role.label(class="form-control-label") }}
+							  {{ form.role(class="form-control form-control-sm") }}
+							</div>
+							<div class="col-md-3">
+								<button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+							</div>
+						</div>
+					</form>
+					{% if flash %}
+        				{% for message in flash %}
+            				<span class="flash-message">{{ message }}</span>
+        				{% endfor %}
+    				{% endif %}
+					{% with messages = get_flashed_messages() %}
+						{% if messages %}
+							<div class="alert alert-danger">
+								{% for message in messages %}
+									<p>{{ message }}</p>
+								{% endfor %}
+							</div>
+						{% endif %}
+					{% endwith %}

@@ -1,49 +1,7 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<title>{{ user.username }} account</title>
-		<!-- Ustawienie kodowania znaków na UTF-8. -->
-		<meta charset="utf-8">
-		<!-- Ustawienie skalowania widoku dla urządzeń mobilnych. -->
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-	</head>
-    <body>
-		<!-- Navbar -->
-		<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-			<!-- logo -->
-			<a class="navbar-brand">Clash Finder</a>
-			<!-- Links -->
-			<ul class="navbar-nav">
-				<li class="nav-item">
-					<a class="nav-link" href="#">Find Teammates</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" href="{{ url_for('findteam') }}">Find Team</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" href="#">About</a>
-				</li>
-			</ul>
-			<!-- Right-aligned items -->
-			<ul class="navbar-nav ml-auto">
-				{% if current_user.is_authenticated %}
-				<li class="nav-item">
-					<form method="post" action="{{ url_for('logout') }}">
-						<button type="submit" class="btn btn-link nav-link">Logout</button>
-					</form>
-				</li>
-				{% else %}
-				<li class="nav-item">
-					<a class="nav-link" href="{{ url_for('login') }}">Login</a>
-				</li>
-				{% endif %}
-			</ul>
-		</nav>
+<!-- extend from "base.html" here -->
+{% extends "base.html" %}
+<!-- begin block content here -->
+{% block content %}
         <!-- teams info -->
         <div class="container">
             <div class="row">
@@ -153,7 +111,7 @@
 							</div>
 						{% endif %}
 					{% endwith %}
-					<form method="POST" action="{{ url_for('create_team', username=user.username) }}">
+					<form method="POST" action="{{ url_for('createteam', username=user.username) }}">
 						{{ form.hidden_tag() }}
 						<div class="form-group">
 							{{ form.profile.label(class="form-control-label") }}
@@ -174,6 +132,5 @@
 				</div>
 			</div>
 		</div>
-	</body>
-</html>
-					
+<!-- end block content here -->
+{% endblock %}		

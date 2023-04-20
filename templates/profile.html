@@ -1,0 +1,55 @@
+<!-- extend from "base.html" here -->
+{% extends "base.html" %}
+<!-- begin block content here -->
+{% block content %}
+        <!-- account info -->
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-6">
+                    <h2>{{ profile.nickname | title }} ({{ profile.server }})</h2>
+						<style>
+							table {
+							  border-collapse: collapse;
+							  font-size: 0.9em;
+							  border: 1px solid #ddd;
+							}
+							
+							th {
+							  border: 1px solid #ddd;
+							  padding: 8px;
+							  text-align: left;
+							}
+							
+							td {
+							  border: 1px solid #ddd;
+							  padding: 8px;
+							}
+							</style>							
+						<div class="account-info">
+							<label for="profiles"><h4>Profile info</h4></label>
+							<table>
+								<thead>
+									<tr>
+										<th><strong>Nickname</strong></th>
+										<th><strong>Server</strong></th>
+										<th><strong>Division</strong></th>
+										<th><strong>Best position</strong></th>
+										<th><strong>Alternative position</strong></th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>{{ profile.nickname }}</td>
+										<td>{{ profile.server }}</td>
+										<td>{{ profile.division }}</td>
+										<td>{{ profile.best_position }}</td>
+										<td>{{ profile.alternative_position }}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>						
+				</div>
+			</div>
+		</div>
+<!-- end block content here -->
+{% endblock %}

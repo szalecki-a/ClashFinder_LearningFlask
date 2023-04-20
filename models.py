@@ -13,7 +13,9 @@ class User(UserMixin, db.Model):
     profiles = db.relationship('Profile', backref='User', lazy='dynamic',
                                cascade="all, delete, delete-orphan")  # powiązanie z kontem uzytkownika
     reports = db.relationship('ReportPlayer', backref='Report', lazy='dynamic',
-                              cascade="all, delete, delete-orphan")  # powiązanie z kontem uzytkownika
+                              cascade="all, delete, delete-orphan")
+    invitation_out = db.relationship('ClashInvitation', backref='User', lazy='dynamic',
+                              cascade="all, delete, delete-orphan")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -35,8 +37,10 @@ class Profile(UserMixin, db.Model):
     alternative_position = db.Column(db.String(20), index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     clash_team = db.relationship('ClashTeam', backref='host', lazy='dynamic')
+    invitation_in = db.relationship('ClashInvitation', backref='teamleader', lazy='dynamic',
+                              cascade="all, delete, delete-orphan")
     reported = db.relationship('ReportPlayer', backref='Reported', lazy='dynamic',
-                              cascade="all, delete, delete-orphan")  # powiązanie z reportowanym profilem
+                              cascade="all, delete, delete-orphan")
 
 
 
@@ -51,6 +55,8 @@ class ClashTeam(UserMixin, db.Model):
     adcarry = db.Column(db.String(64), index=True, default=None)
     support = db.Column(db.String(64), index=True, default=None)
     host_id = db.Column(db.Integer, db.ForeignKey('profile.id'))
+    invitation = db.relationship('ClashInvitation', backref='futureteam', lazy='dynamic',
+                              cascade="all, delete, delete-orphan")
 
 
     # def __init__(self, role, clash_date=None):
@@ -106,6 +112,21 @@ class ReportPlayer(UserMixin, db.Model):
         db.Integer, db.ForeignKey('user.id'), nullable=False)
     reported_id = db.Column(
         db.Integer, db.ForeignKey('profile.id'), nullable=False)
+
+
+# Klasa zaproszeń
+class ClashInvitation(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    role = db.Column(db.String(20), index=True)
+    team_id = db.Column(
+        db.Integer, db.ForeignKey('clash_team.id'), nullable=False)
+    host_id = db.Column(
+        db.Integer, db.ForeignKey('user.id'), nullable=False)
+    guestprofile_id = db.Column(
+        db.Integer, db.ForeignKey('profile.id'), nullable=False)
+
+
+
 
 
 @login.user_loader

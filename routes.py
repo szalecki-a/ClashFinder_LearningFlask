@@ -1,7 +1,7 @@
 from app import app, db, login
 from flask import request, render_template, flash, redirect, url_for
-from models import User, Profile, ClashTeam, ReportPlayer
-from forms import RegistrationForm, LoginForm, ProfileForm, SearchingTeam, CreatingTeam, SearchingProfile, positions, divisions
+from models import User, Profile, ClashTeam, ReportPlayer, ClashInvitation
+from forms import RegistrationForm, LoginForm, ProfileForm, SearchingTeam, CreatingTeam, SearchingProfile, InvitePlayer, positions, divisions
 from werkzeug.urls import url_parse
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from sqlalchemy import or_
@@ -10,7 +10,7 @@ from datetime import datetime
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    return render_template('index.html')
+    return render_template('index.html', user=current_user)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -26,7 +26,7 @@ def register():
         db.session.commit()
         flash('Congratulations, you are now a registered user!')
         return redirect(url_for('index'))
-    return render_template('register.html', title='Register', form=form)
+    return render_template('register.html', title='Register', form=form, user=current_user)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -34,6 +34,7 @@ def login():
     # sprawdzam czy current_user jest zalogowany, TRUE przekierowywuje na stronę użytkownika
     if current_user.is_authenticated:
         return redirect(url_for('user', username=current_user.username))
+    user = current_user
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
@@ -45,8 +46,7 @@ def login():
             return redirect(next_page)
         else:
             flash('Invalid username or password')
-
-    return render_template('login.html', form=form)
+    return render_template('login.html', form=form, user=user)
 
 
 # ścieżka strony użytkownika, która pokazuje dane konta, profile oraz pozwala tworzyć profile
@@ -58,7 +58,7 @@ def user(username):
     if len(profiles) == 0:
         profiles = []
     form = ProfileForm()
-    return render_template('user.html', profiles=profiles, form=form, user=current_user, title='User Profile')
+    return render_template('user.html', profiles=profiles, form=form, user=user)
 
 
 # ścieżka pozwalająca tworzyć profile i przekierowywuje spowrotem na stronę użytkownika
@@ -86,6 +86,22 @@ def create_profile(username):
     return redirect(url_for('user', username=user.username))
 
 
+# ścieżka strony drużyny
+@app.route('/team/<int:teamid>', methods=['GET', 'POST'])
+@login_required
+def team(teamid):
+    team = ClashTeam.query.filter_by(id=teamid).first_or_404()
+    return render_template('team.html', team=team, user=current_user)
+
+
+# ścieżka strony profilu
+@app.route('/profile/<int:profid>', methods=['GET', 'POST'])
+@login_required
+def profile(profid):
+    profile = Profile.query.filter_by(id=profid).first_or_404()
+    return render_template('profile.html', profile=profile, user=current_user)
+
+
 # ścieżka drużyn stworzonych przez użytkownika, 
 #warto rozszerzyć ścieżkę o listę drużyn, których jest członkiem, ale to po stworzeniu mechanizmu dołączania do drużyn
 @app.route('/user/<username>/teams', methods=['GET', 'POST'])
@@ -105,9 +121,9 @@ def yourteams(username):
 
 # ścieżka pozwalająca tworzyć drużyny i przekierowywuje spowrotem na stronę drużyn użytkownika
 # rozszerzyć o sprawdzanie daty tworzenia drużyny, może dodać pole z rokiem...
-@app.route('/user/<username>/create_team', methods=['GET', 'POST'])
+@app.route('/user/<username>/createteam', methods=['GET', 'POST'])
 @login_required
-def create_team(username):
+def createteam(username):
     user = User.query.filter_by(username=username).first_or_404()
     user_profiles = Profile.query.filter_by(user_id=user.id).all()
     user_teams = []
@@ -174,12 +190,12 @@ def findteam():
     return render_template('findteam.html', clash_teams=clash_teams, form=form, user=user)
 
 
-
 #ścieżka pozwalająca wyszukać zawodników
 @app.route('/findteammates', methods=['GET', 'POST'])
 @login_required
 def findteammates():
     user = User.query.filter_by(username=current_user.username).first_or_404()
+    user_profiles = Profile.query.filter_by(user_id=user.id).all()
     find_teammates = Profile.query.all()
     if len(find_teammates) == 0:
         find_teammates = []
@@ -195,10 +211,57 @@ def findteammates():
         else:
             div = [form.divisions.data]   
         find_teammates = Profile.query.filter(or_(Profile.best_position.in_(roles), Profile.alternative_position.in_(roles)), Profile.division.in_(div), Profile.server==current_profile.server)
-    return render_template('findteammates.html', find_teammates=find_teammates, form=form, user=user)
+    return render_template('findteammates.html', find_teammates=find_teammates, form=form, user=user, user_profiles=user_profiles)
 
 
+#ścieżka pozwalająca zapraszać zawodników
+#ZWRÓCIĆ UWAGĘ, ZE BĘDZIEMY ZAPRASZAĆ PROFILE
+@app.route('/invite/<int:user_id>/<int:guest_id>', methods=['GET', 'POST'])
+@login_required
+def inviteteammates(user_id, guest_id):
+    user = User.query.filter_by(id=current_user.id).first_or_404()
+    user_profiles = Profile.query.filter_by(user_id=user.id).all()
+    inv_guest = Profile.query.filter_by(id=guest_id).first_or_404()
+    form = InvitePlayer(user_profiles)
+    return render_template('invitations.html', form=form, user=user, user_profiles=user_profiles, inv_guest=inv_guest)
+        
 
+#ścieżka pozwalająca zapraszać zawodników cd
+#ZWRÓCIĆ UWAGĘ, ZE BĘDZIEMY ZAPRASZAĆ PROFILE
+@app.route('/sendinvitation/<int:user_id>/<int:guest_id>', methods=['GET', 'POST'])
+@login_required
+def sendinvitation(user_id, guest_id):
+    user = User.query.filter_by(id=current_user.id).first_or_404()
+    user_profiles = Profile.query.filter_by(user_id=user.id).all()
+    inv_guest = Profile.query.filter_by(id=guest_id).first_or_404()
+    form = InvitePlayer(user_profiles)
+    if form.validate_on_submit():
+        inv_for_team = ClashTeam.query.filter_by(id=form.clashteam.data).first_or_404()
+        new_inv = ClashInvitation(
+            team_id = inv_for_team.id,
+            role = form.role.data,
+            host = user.id,
+            guestprofile = inv_guest.id,
+        )
+        db.session.add(new_inv)
+        db.session.commit()
+    return redirect(url_for('inviteteammates', user_id=user.id, guest_id=inv_guest.id))
+ 
+
+# ścieżka drużyn stworzonych przez użytkownika, 
+#warto rozszerzyć ścieżkę o listę drużyn, których jest członkiem, ale to po stworzeniu mechanizmu dołączania do drużyn
+@app.route('/user/<username>/inbox', methods=['GET', 'POST'])
+@login_required
+def inbox(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    profiles = Profile.query.filter_by(user_id=user.id).all()
+    profiles_id = []
+    for profile in profiles:
+        profiles_id.extend(profile.id)
+    invitations = ClashInvitation.query.filter(ClashInvitation.guestprofile.in_(profiles_id)).all()
+    if len(invitations) == 0:
+        invitations = []
+    return render_template('inbox.html', invitations=invitations, user=user)
 
 
 #ścieżka wylogowywująca użytkownika

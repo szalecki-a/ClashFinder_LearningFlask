@@ -27,3 +27,12 @@ git commit -m "komentarz"
 git push (heroku master)
 
 heroku open do otworzenia strony
+
+
+
+
+Or push a context manually if using a plain python shell.
+$ python
+>>> from app import app, db
+>>> app.app_context().push()
+>>> db.create_all()
