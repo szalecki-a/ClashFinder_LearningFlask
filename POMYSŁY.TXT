@@ -1,0 +1,10 @@
+- rozszerzyć ścieżkę o listę drużyn, których jest członkiem, ale to po stworzeniu mechanizmu dołączania do drużyn
+- uniemożliwić tworzenie drużyn z datą wsteczną
+- dodać forme request o dołączenie do drużyny
+- aktualizacja htmlów o requesty 
+- zmienić formę wyświetlania daty clasha
+- dodać mechanizm odejścia/wywalania z drużyny
+- dodać mechanizm znikania zaproszeń/próśb po wygaśnięciu daty spotkania
+- uniemożliwiać zapraszanie tego samego profilu do tego samego teamu
+- dodać ostrzeżenie dołączania do drużyny, kiedy dołączasz do niej a masz już w tym terminie inną drużynę
+- dodać mechanizm zmiany danych profilu

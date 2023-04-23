@@ -3,6 +3,7 @@
 <!-- begin block content here -->
 {% block content %}
         <!-- searching teams bar -->
+		{% if current_user.id == user.id %}
         <div class="container">
             <div class="row">
                 <div class="col-sm-6">
@@ -23,17 +24,12 @@
 							</div>
 						</div>
 					</form>
-					{% if flash %}
-        				{% for message in flash %}
-            				<span class="flash-message">{{ message }}</span>
-        				{% endfor %}
-    				{% endif %}
-					{% with messages = get_flashed_messages() %}
-						{% if messages %}
-							<div class="alert alert-danger">
-								{% for message in messages %}
-									<p>{{ message }}</p>
-								{% endfor %}
-							</div>
-						{% endif %}
-					{% endwith %}
+				</div>
+			</div>
+		</div>
+		{% else %}
+		<p>You do not have access to this page.</p>
+		{% endif %}
+<!-- end block content here -->
+{% endblock %}
+				

@@ -26,20 +26,6 @@
 							<br>
 						</div>
 					</form>
-					{% if flash %}
-        				{% for message in flash %}
-            				<span class="flash-message">{{ message }}</span>
-        				{% endfor %}
-    				{% endif %}
-					{% with messages = get_flashed_messages() %}
-						{% if messages %}
-							<div class="alert alert-danger">
-								{% for message in messages %}
-									<p>{{ message }}</p>
-								{% endfor %}
-							</div>
-						{% endif %}
-					{% endwith %}
                     <h2>Available Players</h2>
 						<style>
 							table {
@@ -79,12 +65,12 @@
 									{% for teammate in find_teammates %}
 									<tr>
 										<td>{{ loop.index }}</td>
-										<td><a href="#">{{ teammate.nickname }}</a></td>
+										<td><a href="{{ url_for('profile', nickname=teammate.nickname, server=get_server_short_name(teammate.server).lower()) }}">{{ teammate.nickname }}</a></td>
 										<td>{{ teammate.division }}</td>
 										<td>{{ teammate.best_position }}</td>
 										<td>{{ teammate.alternative_position }}</td>
 										<td>{{ teammate.server }}</td>
-										<td><a href="#">Invite</a></td>
+										<td><a href="{{ url_for('inviteteammates', user_id=user.id, guest_id=teammate.id) }}">Invite</a></td>
 									</tr>
 									{% endfor %}
 								</tbody>

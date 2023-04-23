@@ -7,6 +7,7 @@
             <div class="row">
                 <div class="col-sm-6">
                     <h2>{{ user.username | title }}</h2>
+					{% if current_user.id == user.id %}
                         <div class="account-info">
                             <div class="form-group row">
                                 <label for="username" class="col-sm-4 col-form-label">Username:</label>
@@ -23,6 +24,7 @@
                                 </div>
                             </div>
                         </div>
+					{% endif %}
 						<style>
 							table {
 							  border-collapse: collapse;
@@ -42,8 +44,11 @@
 							}
 							</style>							
 						<!-- Przycisk twoich drużyn -->
+						{% if current_user.id == user.id %}
 						<a href="{{ url_for('yourteams', username=user.username) }}" class="btn btn-primary btn-lg">Your Clash Teams</a>
+						{% endif %}
 						<!-- Lista dodanych profili -->
+						{% if profiles %}
 						<div class="account-info">
 							<label for="profiles"><h2>Profiles</h2></label>
 							<table>
@@ -61,7 +66,7 @@
 									{% for profile in profiles %}
 									<tr>
 										<td>{{ loop.index }}</td>
-										<td>{{ profile.nickname }}</td>
+										<td><a href="{{ url_for('profile', nickname=profile.nickname, server=get_server_short_name(profile.server).lower()) }}">{{ profile.nickname }}</a></td> 
 										<td>{{ profile.server }}</td>
 										<td>{{ profile.division }}</td>
 										<td>{{ profile.best_position }}</td>
@@ -70,22 +75,12 @@
 									{% endfor %}
 								</tbody>
 							</table>
-						</div>						
-					<h2>Add another profile</h2>
-					{% if flash %}
-        				{% for message in flash %}
-            				<span class="flash-message">{{ message }}</span>
-        				{% endfor %}
-    				{% endif %}
-					{% with messages = get_flashed_messages() %}
-						{% if messages %}
-							<div class="alert alert-danger">
-								{% for message in messages %}
-									<p>{{ message }}</p>
-								{% endfor %}
-							</div>
+						</div>
+						{% else %}
+						<p>Currently  you do not have any Profiles.</p>
 						{% endif %}
-					{% endwith %}
+					{% if current_user.id == user.id %}					
+					<h2>Add another profile</h2>
 					<form method="POST" action="{{ url_for('create_profile', username=user.username) }}">
 						{{ form.hidden_tag() }}
 						<div class="form-group">
@@ -110,6 +105,7 @@
 						</div>
 						<button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
 					</form>
+					{% endif %}
 				</div>
 			</div>
 		</div>

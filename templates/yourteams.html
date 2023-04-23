@@ -3,6 +3,7 @@
 <!-- begin block content here -->
 {% block content %}
         <!-- teams info -->
+		{% if current_user.id == user.id %}
         <div class="container">
             <div class="row">
                 <div class="col-sm-6">
@@ -19,16 +20,18 @@
 							  border: 1px solid #ddd;
 							  padding: 8px;
 							  text-align: left;
+							  width: calc(100% / 9);
 							}
 							
 							td {
 							  border: 1px solid #ddd;
 							  padding: 8px;
+							  width: calc(100% / 9);
 							}
 							</style>							
 						<!-- Lista dodanych profili -->
 						<div class="teams-info">
-							{% if your_clash_teams %}
+							{% if user_clashteams %}
                             <table>
                                 <thead>
                                     <tr>
@@ -44,43 +47,43 @@
                                     </tr>
                                 </thead>
 								<tbody>
-									{% for team in your_clash_teams %}
+									{% for team in user_clashteams %}
 									<tr>
 										<td>{{ loop.index }}</td>
 										<td>{{ team.host.server }}</td>
 										<td>
 											{% if team.toplane %}
-												<a href="#{{ team.toplane }}">{{ team.toplane }}</a>
+												<a href="{{ url_for('profile', nickname=team.toplane, server=get_server_short_name(team.host.server).lower()) }}">{{ team.toplane }}</a>
 											{% else %}
-												<a href="#">join</a>
+												<a href="{{ url_for('findteammates') }}">find player</a>
 											{% endif %}
 										</td>
 										<td>
 											{% if team.jungle %}
-												<a href="#{{ team.jungle }}">{{ team.jungle }}</a>
+												<a href="{{ url_for('profile', nickname=team.jungle, server=get_server_short_name(team.host.server).lower()) }}">{{ team.jungle }}</a>
 											{% else %}
-												<a href="#">join</a>
+												<a href="{{ url_for('findteammates') }}">find player</a>
 											{% endif %}
 										</td>
 										<td>
 											{% if team.midlane %}
-												<a href="#{{ team.midlane }}">{{ team.midlane }}</a>
+												<a href="{{ url_for('profile', nickname=team.midlane, server=get_server_short_name(team.host.server).lower()) }}">{{ team.midlane }}</a>
 											{% else %}
-												<a href="#">join</a>
+												<a href="{{ url_for('findteammates') }}">find player</a>
 											{% endif %}
 										</td>
 										<td>
-											{% if team.adcarry %}
-												<a href="#{{ team.adcarry }}">{{ team.adcarry }}</a>
+											{% if team.bottom %}
+												<a href="{{ url_for('profile', nickname=team.bottom, server=get_server_short_name(team.host.server).lower()) }}">{{ team.bottom }}</a>
 											{% else %}
-												<a href="#">join</a>
+												<a href="{{ url_for('findteammates') }}">find player</a>
 											{% endif %}
 										</td>
 										<td>
 											{% if team.support %}
-												<a href="#{{ team.support }}">{{ team.support }}</a>
+												<a href="{{ url_for('profile', nickname=team.support, server=get_server_short_name(team.host.server).lower()) }}">{{ team.support }}</a>
 											{% else %}
-												<a href="#">join</a>
+												<a href="{{ url_for('findteammates') }}">find player</a>
 											{% endif %}
 										</td>
 										<td>{{ team.clash_date or '' }}</td>
@@ -90,27 +93,82 @@
 								</tbody>
                             </table>
                             {% else %}
-                            <p>Currently  you do not belong to any Clash Team.</p>
+                            <p>Currently, you are not hosting any Clash Team.</p>
                             {% endif %}
-						</div>	
+						</div>
+						<div style="height: 20px;"></div> 	
+						<h2>Teams you are part of</h2>
+						<div class="teams-info">
+							{% if guest_teams %}
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th><strong>Lp.</strong></th>
+										<th><strong>Server</strong></th>
+                                        <th><strong>TOPLANE</strong></th>
+                                        <th><strong>JUNGLE</strong></th>
+                                        <th><strong>MIDLANE</strong></th>
+                                        <th><strong>BOTTOM</strong></th>
+                                        <th><strong>SUPPORT</strong></th>
+                                        <th><strong>CLASH DATE</strong></th>
+                                        <th><strong>HOST DIVISION</strong></th>
+                                    </tr>
+                                </thead>
+								<tbody>
+									{% for guest_team in guest_teams %}
+									<tr>
+										<td>{{ loop.index }}</td>
+										<td>{{ guest_team.host.server }}</td>
+										<td>
+											{% if guest_team.toplane %}
+												<a href="{{ url_for('profile', nickname=guest_team.toplane, server=get_server_short_name(guest_team.host.server).lower()) }}">{{ guest_team.toplane }}</a>
+											{% else %}
+												<a href="{{ url_for('findteammates') }}">find player</a>
+											{% endif %}
+										</td>
+										<td>
+											{% if guest_team.jungle %}
+												<a href="{{ url_for('profile', nickname=guest_team.jungle, server=get_server_short_name(guest_team.host.server).lower()) }}">{{ guest_team.jungle }}</a>
+											{% else %}
+												<a href="{{ url_for('findteammates') }}">find player</a>
+											{% endif %}
+										</td>
+										<td>
+											{% if guest_team.midlane %}
+												<a href="{{ url_for('profile', nickname=guest_team.midlane, server=get_server_short_name(guest_team.host.server).lower()) }}">{{ guest_team.midlane }}</a>
+											{% else %}
+												<a href="{{ url_for('findteammates') }}">find player</a>
+											{% endif %}
+										</td>
+										<td>
+											{% if guest_team.bottom %}
+												<a href="{{ url_for('profile', nickname=guest_team.bottom, server=get_server_short_name(guest_team.host.server).lower()) }}">{{ guest_team.bottom }}</a>
+											{% else %}
+												<a href="{{ url_for('findteammates') }}">find player</a>
+											{% endif %}
+										</td>
+										<td>
+											{% if guest_team.support %}
+												<a href="{{ url_for('profile', nickname=guest_team.support, server=get_server_short_name(guest_team.host.server).lower()) }}">{{ guest_team.support }}</a>
+											{% else %}
+												<a href="{{ url_for('findteammates') }}">find player</a>
+											{% endif %}
+										</td>
+										<td>{{ guest_team.clash_date or '' }}</td>
+										<td>{{ guest_team.division or '' }}</td>
+									</tr>
+									{% endfor %}
+								</tbody>
+                            </table>
+                            {% else %}
+                            <p>Currently not belonging to any Clash Team.</p>
+                            {% endif %}
+						</div>
+						<div style="height: 20px;"></div> 	
                         <!-- Przycisk do strony z wyszukiwaniem druzyn -->
 						<a href="{{ url_for('findteam') }}" class="btn btn-primary btn-lg">Find Team</a>
-					<br>
+						<div style="height: 20px;"></div> 
 					<h2>Create your Clash Team</h2>
-					{% if flash %}
-        				{% for message in flash %}
-            				<span class="flash-message">{{ message }}</span>
-        				{% endfor %}
-    				{% endif %}
-					{% with messages = get_flashed_messages() %}
-						{% if messages %}
-							<div class="alert alert-danger">
-								{% for message in messages %}
-									<p>{{ message }}</p>
-								{% endfor %}
-							</div>
-						{% endif %}
-					{% endwith %}
 					<form method="POST" action="{{ url_for('createteam', username=user.username) }}">
 						{{ form.hidden_tag() }}
 						<div class="form-group">
@@ -132,5 +190,8 @@
 				</div>
 			</div>
 		</div>
+	{% else %}
+	<p>You do not have access to this page.</p>
+	{% endif %}
 <!-- end block content here -->
 {% endblock %}		

@@ -14,7 +14,7 @@ class User(UserMixin, db.Model):
                                cascade="all, delete, delete-orphan")  # powiązanie z kontem uzytkownika
     reports = db.relationship('ReportPlayer', backref='Report', lazy='dynamic',
                               cascade="all, delete, delete-orphan")
-    invitation_out = db.relationship('ClashInvitation', backref='User', lazy='dynamic',
+    invitation_out = db.relationship('ClashInvitation', backref='teamleader', lazy='dynamic',
                               cascade="all, delete, delete-orphan")
 
     def set_password(self, password):
@@ -37,7 +37,7 @@ class Profile(UserMixin, db.Model):
     alternative_position = db.Column(db.String(20), index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     clash_team = db.relationship('ClashTeam', backref='host', lazy='dynamic')
-    invitation_in = db.relationship('ClashInvitation', backref='teamleader', lazy='dynamic',
+    invitation_in = db.relationship('ClashInvitation', backref='invitedguest', lazy='dynamic',
                               cascade="all, delete, delete-orphan")
     reported = db.relationship('ReportPlayer', backref='Reported', lazy='dynamic',
                               cascade="all, delete, delete-orphan")
@@ -52,25 +52,12 @@ class ClashTeam(UserMixin, db.Model):
     toplane = db.Column(db.String(64), index=True, default=None)
     jungle = db.Column(db.String(64), index=True, default=None)
     midlane = db.Column(db.String(64), index=True, default=None)
-    adcarry = db.Column(db.String(64), index=True, default=None)
+    bottom = db.Column(db.String(64), index=True, default=None)
     support = db.Column(db.String(64), index=True, default=None)
     host_id = db.Column(db.Integer, db.ForeignKey('profile.id'))
     invitation = db.relationship('ClashInvitation', backref='futureteam', lazy='dynamic',
                               cascade="all, delete, delete-orphan")
 
-
-    # def __init__(self, role, clash_date=None):
-    #     self.clash_date = clash_date
-    #     self.toplane = None if role != "toplane" else Profile.nickname
-    #     self.jungle = None if role != "jungle" else Profile.nickname
-    #     self.midlane = None if role != "midlane" else Profile.nickname
-    #     self.adcarry = None if role != "adcarry" else Profile.nickname
-    #     self.support = None if role != "support" else Profile.nickname
-    #     if clash_date != None:
-    #         if datetime.now() < self.clash_date:
-    #             self.clash_date = clash_date
-    #         else:
-    #             raise Exception("Pick correct date")
 
     def add_top(self, top_name):
         if self.toplane is None:
@@ -90,9 +77,9 @@ class ClashTeam(UserMixin, db.Model):
         else:
             raise Exception("The midlane position is already taken.")
 
-    def add_adcarry(self, adcarry_name):
-        if self.adcarry is None:
-            self.adcarry = adcarry_name
+    def add_bottom(self, bottom_name):
+        if self.bottom is None:
+            self.bottom = bottom_name
         else:
             raise Exception("The bot position is already taken.")
 
@@ -118,15 +105,12 @@ class ReportPlayer(UserMixin, db.Model):
 class ClashInvitation(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     role = db.Column(db.String(20), index=True)
-    team_id = db.Column(
+    futureteam_id = db.Column(
         db.Integer, db.ForeignKey('clash_team.id'), nullable=False)
-    host_id = db.Column(
+    lider_id = db.Column(
         db.Integer, db.ForeignKey('user.id'), nullable=False)
     guestprofile_id = db.Column(
         db.Integer, db.ForeignKey('profile.id'), nullable=False)
-
-
-
 
 
 @login.user_loader
