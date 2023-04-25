@@ -1,4 +1,3 @@
 - dodać mechanizm odejścia z drużyny
 - uniemożliwiać zapraszanie tego samego profilu do tego samego teamu
 - dodać ostrzeżenie dołączania do drużyny, kiedy dołączasz do niej a masz już w tym terminie inną drużynę
-- dodać mechanizm zmiany danych profilu

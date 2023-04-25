@@ -37,6 +37,9 @@
 							<th><strong>Division</strong></th>
 							<th><strong>Best position</strong></th>
 							<th><strong>Alternative position</strong></th>
+							{% if current_user.id == user.id %}
+							<td></td>
+							{% endif %}
 						</tr>
 					</thead>
 					<tbody>
@@ -46,6 +49,9 @@
 							<td>{{ profile.division }}</td>
 							<td>{{ profile.best_position }}</td>
 							<td>{{ profile.alternative_position }}</td>
+							{% if current_user.id == user.id %}
+							<td><a href="{{ url_for('edit_profile', username=user.username, profile_id=profile.id) }}">edit</a></td>
+							{% endif %}
 						</tr>
 					</tbody>
 				</table>

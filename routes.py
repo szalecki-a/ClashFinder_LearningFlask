@@ -1,7 +1,7 @@
 from app import app, db, login
 from flask import request, render_template, flash, redirect, url_for
 from models import User, Profile, ClashTeam, ReportPlayer, ClashInvitation, ClashRequest
-from forms import RegistrationForm, LoginForm, ProfileForm, SearchingTeam, CreatingTeam, SearchingProfile, InvitePlayer, AnswerForm, RequestForm, positions, divisions, get_server_short_name, get_server_name_from_short
+from forms import RegistrationForm, LoginForm, ProfileForm, SearchingTeam, CreatingTeam, SearchingProfile, InvitePlayer, AnswerForm, RequestForm, EditProfileForm, DeleteProfileForm, positions, divisions, get_server_short_name, get_server_name_from_short
 from werkzeug.urls import url_parse
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from sqlalchemy import or_, and_, inspect
@@ -21,13 +21,20 @@ def register():
         return redirect(url_for('user', username=current_user.username))
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, email=form.email.data)
-        user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.commit()
-        flash('Congratulations, you are now a registered user!', 'success')
-        login_user(user)
-        return redirect(url_for('user', username=user.username))
+        existing_username = User.query.filter_by(username=form.username.data).first()
+        existing_email = User.query.filter_by(email=form.email.data).first()
+        if existing_username is not None:
+            flash('A account with this username already exists on this server.', 'error')
+        elif existing_email is not None:
+            flash('This email has already been used', 'error')
+        else:
+            user = User(username=form.username.data, email=form.email.data)
+            user.set_password(form.password.data)
+            db.session.add(user)
+            db.session.commit()
+            flash('Congratulations, you are now a registered user!', 'success')
+            login_user(user)
+            return redirect(url_for('user', username=user.username))
     return render_template('register.html', title='Register', form=form, user=current_user)
 
 
@@ -87,6 +94,55 @@ def create_profile(username):
             db.session.add(new_profile)
             db.session.commit()
             flash('Your profile has been created successfully.', 'success')
+    return redirect(url_for('user', username=user.username))
+
+
+# ścieżka edycji profilu
+@app.route('/user/<username>/<int:profile_id>/edit_profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile(username, profile_id):
+    user = User.query.filter_by(username=username).first_or_404()
+    profile = Profile.query.filter_by(id=profile_id).first_or_404()
+    form1 = EditProfileForm()
+    form2 = DeleteProfileForm()
+    if form1.validate_on_submit():
+        existing_profile = Profile.query.filter_by(nickname=form1.nickname.data, server=form1.server.data).first()
+        if existing_profile is not None:
+            flash('A profile with this nickname already exists on this server.', 'error')
+        else:
+            profile.nickname = form1.nickname.data
+            profile.server = form1.server.data
+            profile.division = form1.division.data
+            profile.best_position = form1.pref_role.data
+            profile.alternative_position = form1.alternative_role.data
+
+            db.session.add(profile)
+            db.session.commit()
+            flash('Your profile has been updated.', 'success')
+        return redirect(url_for('user', username=user.username))
+    elif form2.delete_button.data:
+        print('oko')
+        db.session.delete(profile)
+        db.session.commit()
+        flash('Your profile has been deleted.', 'message')
+        return redirect(url_for('user', username=user.username))
+    return render_template('profile_edit.html', profile=profile, form1=form1, form2=form2, user=user)
+
+
+# ścieżka usuwania profilu
+@app.route('/user/<username>/<int:profile_id>/delete_profile', methods=['GET', 'POST'])
+@login_required
+def delete_profile(username, profile_id):
+    user = User.query.filter_by(username=username).first_or_404()
+    profile = Profile.query.filter_by(id=profile_id)
+    form = EditProfileForm()
+    if form.validate_on_submit():
+        if form.delete_button.data:
+            db.session.delete(profile)
+            db.session.commit()
+            flash('Your profile has been deleted.', 'message')
+        else:
+            flash('xxxxxxxxxxxxxxxx', 'error')
     return redirect(url_for('user', username=user.username))
 
 
@@ -380,7 +436,6 @@ def inv_withdrawal(username):
             db.session.delete(delsend_invitation)
             db.session.commit()
             flash('Invitation deleted successfully.', 'success')
-            return redirect(url_for('mailbox', username=user.username))
     return redirect(url_for('mailbox', username=user.username))
 
 

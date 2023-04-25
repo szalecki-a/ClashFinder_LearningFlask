@@ -83,6 +83,24 @@ class ProfileForm(FlaskForm):
     submit = SubmitField('Add Profile')
 
 
+class EditProfileForm(FlaskForm):
+    nickname = StringField('Nickname', validators=[DataRequired()])
+    server = SelectField('Server', choices=servers,
+                         validators=[DataRequired()])
+    division = SelectField('Division', choices=divisions,
+                           validators=[DataRequired()])
+    pref_role = SelectField(
+        'Prefer Role', choices=positions, validators=[DataRequired()])
+    alternative_role = SelectField('Alternative Role', choices=positions, validators=[
+                                   DataRequired(), DifferentRole('pref_role')])
+    submit = SubmitField('Edit Profile')
+
+class DeleteProfileForm(FlaskForm):
+    delete_button = SubmitField('Delete Profile')
+
+
+
+
 class CreatingTeam(FlaskForm):
     profile = SelectField('Profile', validators=[DataRequired()], choices=[])
     role = SelectField('Select Role', validators=[
