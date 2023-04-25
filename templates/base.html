@@ -1,99 +1,102 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Clash Finder AS</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-		<style>
-			.flashes {
-			  list-style: none;
-			  margin: 0;
-			  padding: 0;
-			}
-			
-			.success {
-			  background-color: #4CAF50;
-			  color: white;
-			  padding: 10px;
-			  margin-bottom: 10px;
-			  border-radius: 5px;
-			}
-			
-			.error {
-			  background-color: #f44336;
-			  color: white;
-			  padding: 10px;
-			  margin-bottom: 10px;
-			  border-radius: 5px;
-			}
-			
-			.message {
-			  background-color: #2196F3;
-			  color: white;
-			  padding: 10px;
-			  margin-bottom: 10px;
-			  border-radius: 5px;
-			}
-		  </style>
-	</head>
-    <body>
-		<!-- Navbar -->
-		<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
-			<!-- logo -->
-			<a class="navbar-brand" href="{{ url_for('index') }}">Clash Finder</a>
-			<!-- Links -->
-			<ul class="navbar-nav">
-				<li class="nav-item">
-					<a class="nav-link" href="{{ url_for('findteam') }}">Find Team</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" href="{{ url_for('findteammates') }}">Find Teammates</a>
-				</li>
-				<li class="nav-item">
-					<a class="nav-link" href="#">About</a>
-				</li>
-			</ul>
-			<!-- Right-aligned items -->
-			<ul class="navbar-nav ml-auto">
-				{% if current_user.is_authenticated %}
-				<li class="nav-item">
-					<form method="post" action="{{ url_for('mailbox', username = user.username) }}">
-						<button type="submit" class="btn btn-link nav-link">Mailbox</button>
-					</form>
-				</li>
-                <li class="nav-item">
-					<form method="post" action="{{ url_for('user', username = user.username) }}">
-						<button type="submit" class="btn btn-link nav-link">Profile</button>
-					</form>
-				</li>
-                <li class="nav-item">
-					<form method="post" action="{{ url_for('logout') }}">
-						<button type="submit" class="btn btn-link nav-link">Logout</button>
-					</form>
-				</li>
-				{% else %}
-				<li class="nav-item">
-					<a class="nav-link" href="{{ url_for('login') }}">Login</a>
-				</li>
-				{% endif %}
-			</ul>
-		</nav>
-		<!-- Flash messages -->		  
-		{% with messages = get_flashed_messages(with_categories=true) %}
-		{% if messages %}
-		  <ul class=flashes>
-		  {% for category, message in messages %}
-			<li class="{{ category }}">{{ message }}</li>
-		  {% endfor %}
-		  </ul>
-		{% endif %}
-	  	{% endwith %}
-		<!-- End flash messages -->
-        {% block content %}
-        {% endblock %}
-    </body>
+
+<head>
+	<title>Clash Finder AS</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	<style>
+		.flashes {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+		}
+
+		.success {
+			background-color: #4CAF50;
+			color: white;
+			padding: 10px;
+			margin-bottom: 10px;
+			border-radius: 5px;
+		}
+
+		.error {
+			background-color: #f44336;
+			color: white;
+			padding: 10px;
+			margin-bottom: 10px;
+			border-radius: 5px;
+		}
+
+		.message {
+			background-color: #2196F3;
+			color: white;
+			padding: 10px;
+			margin-bottom: 10px;
+			border-radius: 5px;
+		}
+	</style>
+</head>
+
+<body>
+	<!-- Navbar -->
+	<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+		<!-- logo -->
+		<a class="navbar-brand" href="{{ url_for('index') }}">Clash Finder</a>
+		<!-- Links -->
+		<ul class="navbar-nav">
+			<li class="nav-item">
+				<a class="nav-link" href="{{ url_for('findteam') }}">Find Team</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="{{ url_for('findteammates') }}">Find Teammates</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="#">About</a>
+			</li>
+		</ul>
+		<!-- Right-aligned items -->
+		<ul class="navbar-nav ml-auto">
+			{% if current_user.is_authenticated %}
+			<li class="nav-item">
+				<form method="post" action="{{ url_for('mailbox', username = user.username) }}">
+					<button type="submit" class="btn btn-link nav-link">Mailbox</button>
+				</form>
+			</li>
+			<li class="nav-item">
+				<form method="post" action="{{ url_for('user', username = user.username) }}">
+					<button type="submit" class="btn btn-link nav-link">Profile</button>
+				</form>
+			</li>
+			<li class="nav-item">
+				<form method="post" action="{{ url_for('logout') }}">
+					<button type="submit" class="btn btn-link nav-link">Logout</button>
+				</form>
+			</li>
+			{% else %}
+			<li class="nav-item">
+				<a class="nav-link" href="{{ url_for('login') }}">Login</a>
+			</li>
+			{% endif %}
+		</ul>
+	</nav>
+	<!-- Flash messages -->
+	{% with messages = get_flashed_messages(with_categories=true) %}
+	{% if messages %}
+	<ul class=flashes>
+		{% for category, message in messages %}
+		<li class="{{ category }}">{{ message }}</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+	{% endwith %}
+	<!-- End flash messages -->
+	{% block content %}
+	{% endblock %}
+</body>
+
 </html>

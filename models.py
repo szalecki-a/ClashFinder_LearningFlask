@@ -15,7 +15,9 @@ class User(UserMixin, db.Model):
     reports = db.relationship('ReportPlayer', backref='Report', lazy='dynamic',
                               cascade="all, delete, delete-orphan")
     invitation_out = db.relationship('ClashInvitation', backref='teamleader', lazy='dynamic',
-                              cascade="all, delete, delete-orphan")
+                                     cascade="all, delete, delete-orphan")
+    request_in = db.relationship('ClashRequest', backref='team_creator', lazy='dynamic',
+                                 cascade="all, delete, delete-orphan")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -38,10 +40,11 @@ class Profile(UserMixin, db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     clash_team = db.relationship('ClashTeam', backref='host', lazy='dynamic')
     invitation_in = db.relationship('ClashInvitation', backref='invitedguest', lazy='dynamic',
-                              cascade="all, delete, delete-orphan")
+                                    cascade="all, delete, delete-orphan")
+    request_out = db.relationship('ClashRequest', backref='candidate', lazy='dynamic',
+                                  cascade="all, delete, delete-orphan")
     reported = db.relationship('ReportPlayer', backref='Reported', lazy='dynamic',
-                              cascade="all, delete, delete-orphan")
-
+                               cascade="all, delete, delete-orphan")
 
 
 # Klasa przedstawiająca tworzenie dużyny Clash
@@ -56,8 +59,12 @@ class ClashTeam(UserMixin, db.Model):
     support = db.Column(db.String(64), index=True, default=None)
     host_id = db.Column(db.Integer, db.ForeignKey('profile.id'))
     invitation = db.relationship('ClashInvitation', backref='futureteam', lazy='dynamic',
+                                 cascade="all, delete, delete-orphan")
+    request = db.relationship('ClashRequest', backref='desired_team', lazy='dynamic',
                               cascade="all, delete, delete-orphan")
 
+    def formatted_clash_date(self):
+        return self.clash_date.strftime('%Y-%m-%dT%H:%M')
 
     def add_top(self, top_name):
         if self.toplane is None:
@@ -110,6 +117,17 @@ class ClashInvitation(UserMixin, db.Model):
     lider_id = db.Column(
         db.Integer, db.ForeignKey('user.id'), nullable=False)
     guestprofile_id = db.Column(
+        db.Integer, db.ForeignKey('profile.id'), nullable=False)
+
+# Klasa prósb
+class ClashRequest(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    role = db.Column(db.String(20), index=True)
+    desired_team_id = db.Column(
+        db.Integer, db.ForeignKey('clash_team.id'), nullable=False)
+    team_host = db.Column(
+        db.Integer, db.ForeignKey('user.id'), nullable=False)
+    candidate_id = db.Column(
         db.Integer, db.ForeignKey('profile.id'), nullable=False)
 
 

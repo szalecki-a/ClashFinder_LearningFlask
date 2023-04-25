@@ -1,12 +1,12 @@
 from app import app, db, login
 from flask import request, render_template, flash, redirect, url_for
-from models import User, Profile, ClashTeam, ReportPlayer, ClashInvitation
-from forms import RegistrationForm, LoginForm, ProfileForm, SearchingTeam, CreatingTeam, SearchingProfile, InvitePlayer, AnswerForm, positions, divisions, get_server_short_name, get_server_name_from_short
+from models import User, Profile, ClashTeam, ReportPlayer, ClashInvitation, ClashRequest
+from forms import RegistrationForm, LoginForm, ProfileForm, SearchingTeam, CreatingTeam, SearchingProfile, InvitePlayer, AnswerForm, RequestForm, positions, divisions, get_server_short_name, get_server_name_from_short
 from werkzeug.urls import url_parse
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, inspect
 from datetime import datetime
-
+from apscheduler.schedulers.background import BackgroundScheduler
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -103,7 +103,8 @@ def team(teamid):
 @login_required
 def profile(server, nickname):
     serv = get_server_name_from_short(server.upper())
-    profile = Profile.query.filter_by(server=serv, nickname=nickname).first_or_404()
+    profile = Profile.query.filter_by(
+        server=serv, nickname=nickname).first_or_404()
     return render_template('profile.html', server=server, profile=profile, user=current_user, get_server_short_name=get_server_short_name)
 
 
@@ -114,17 +115,18 @@ def profile(server, nickname):
 def yourteams(username):
     user = User.query.filter_by(username=username).first_or_404()
     user_profiles = Profile.query.filter(Profile.user_id == user.id)
-    user_clashteams = ClashTeam.query.join(Profile).filter(Profile.id == ClashTeam.host_id, Profile.user_id == user.id).all()
-    user_profiles_data = {user_profile.nickname: user_profile.server for user_profile in user_profiles}
-
+    user_clashteams = ClashTeam.query.join(Profile).filter(
+        Profile.id == ClashTeam.host_id, Profile.user_id == user.id).all()
+    user_profiles_data = {
+        user_profile.nickname: user_profile.server for user_profile in user_profiles}
+    guest_teams = []
     for key, value in user_profiles_data.items():
-        guest_teams = ClashTeam.query.join(Profile).filter(and_(or_(ClashTeam.toplane == key, ClashTeam.jungle == key, ClashTeam.midlane == key, ClashTeam.bottom == key, ClashTeam.support == key), Profile.server == value, Profile.user_id != user.id)).all()
-    if len(guest_teams)==0:
-        guest_teams = []
-    if len(user_clashteams)==0:
+        guest_teams.extend(ClashTeam.query.join(Profile).filter(and_(or_(ClashTeam.toplane == key, ClashTeam.jungle == key, ClashTeam.midlane ==
+                           key, ClashTeam.bottom == key, ClashTeam.support == key), Profile.server == value, Profile.user_id != user.id)).all())
+    if len(user_clashteams) == 0:
         user_clashteams = []
 
-    form = CreatingTeam(user_id=user.id)
+    form = CreatingTeam(user_id=user.id, timerighnow=datetime.now())
     return render_template('yourteams.html', get_server_short_name=get_server_short_name, user_clashteams=user_clashteams, guest_teams=guest_teams, form=form, user=user)
 
 
@@ -134,26 +136,13 @@ def yourteams(username):
 @login_required
 def createteam(username):
     user = User.query.filter_by(username=username).first_or_404()
-    user_profiles = Profile.query.filter_by(user_id=user.id).all()
-    user_teams = []
-    for profile in user_profiles:
-        teams = ClashTeam.query.filter_by(host_id=profile.id).all()
-        user_teams.extend(teams)
     form = CreatingTeam(user_id=user.id)
     if form.validate_on_submit():
         current_profile = Profile.query.filter_by(
             nickname=form.profile.data, user_id=user.id).first()
-        game_date = datetime(year=datetime.now().year, month=int(
-            form.month.data), day=int(form.day.data))
-        # for team in user_teams:
-        #     if game_date in team.clash_date:
-        #         flash('A profile with this nickname already exists on this server.')
-        # if existing_profile is not None:
-        #     flash('A profile with this nickname already exists on this server.')
-        # else:
         new_team = ClashTeam(
             host_id=current_profile.id,
-            clash_date=game_date,
+            clash_date=form.clash_date.data,
             division=current_profile.division,
         )
         if form.role.data == 'Toplane':
@@ -169,6 +158,10 @@ def createteam(username):
         db.session.add(new_team)
         db.session.commit()
         flash('Your Team has been created successfully.', 'success')
+    else:
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f'Invalid date field: {error}', 'error')
     return redirect(url_for('yourteams', username=user.username))
 
 
@@ -178,15 +171,20 @@ def createteam(username):
 def findteam():
     user = User.query.filter_by(username=current_user.username).first_or_404()
     user_profiles = Profile.query.filter_by(user_id=user.id).all()
-    user_clashteams_id = [profile_team.id for user_profile in user_profiles for profile_team in ClashTeam.query.filter_by(host_id=user_profile.id)]
-    user_profiles_data = {user_profile.nickname: user_profile.server for user_profile in user_profiles}
-    roles = {'Toplane': ClashTeam.toplane, 'Jungle': ClashTeam.jungle, 'Midlane': ClashTeam.midlane, 'Bottom': ClashTeam.bottom, 'Support': ClashTeam.support}
+    user_clashteams_id = [profile_team.id for user_profile in user_profiles for profile_team in ClashTeam.query.filter_by(
+        host_id=user_profile.id)]
+    user_profiles_data = {
+        user_profile.nickname: user_profile.server for user_profile in user_profiles}
+    roles = {'Toplane': ClashTeam.toplane, 'Jungle': ClashTeam.jungle,
+             'Midlane': ClashTeam.midlane, 'Bottom': ClashTeam.bottom, 'Support': ClashTeam.support}
 
-    clash_teams = ClashTeam.query.filter(or_(*(role == None for role in roles.values())), ClashTeam.id.notin_(user_clashteams_id)).order_by(ClashTeam.clash_date)
+    clash_teams = ClashTeam.query.filter(or_(*(role == None for role in roles.values(
+    ))), ClashTeam.id.notin_(user_clashteams_id)).order_by(ClashTeam.clash_date)
     for key, value in user_profiles_data.items():
-        clash_teams = clash_teams.filter(and_(or_(ClashTeam.toplane.isnot(key), ClashTeam.jungle.isnot(key), ClashTeam.midlane.isnot(key), ClashTeam.bottom.isnot(key), ClashTeam.support.isnot(key)), ClashTeam.host.has(server=value)))
+        clash_teams = clash_teams.filter(and_(or_(ClashTeam.toplane.isnot(key), ClashTeam.jungle.isnot(key), ClashTeam.midlane.isnot(
+            key), ClashTeam.bottom.isnot(key), ClashTeam.support.isnot(key)), ClashTeam.host.has(server=value)))
     clash_teams_list = clash_teams.all()
-    if len(clash_teams_list)==0:
+    if len(clash_teams_list) == 0:
         clash_teams = []
 
     form = SearchingTeam(user_id=user.id)
@@ -298,7 +296,7 @@ def sendinvitation(user_id, guest_id):
     return redirect(url_for('findteammates'))
 
 
-# ścieżka drużyn stworzonych przez użytkownika,
+# ścieżka skrzynki pocztowej uzytkownika,
 @app.route('/user/<username>/mailbox', methods=['GET', 'POST'])
 @login_required
 def mailbox(username):
@@ -311,16 +309,25 @@ def mailbox(username):
         ClashInvitation.guestprofile_id.in_(profiles_id)).all()
     if len(in_invitations) == 0:
         in_invitations = []
+    in_requests = ClashRequest.query.filter_by(team_host=user.id).all()
+    if len(in_requests) == 0:
+        in_requests = []
     out_invitations = ClashInvitation.query.filter_by(lider_id=user.id).all()
     if len(out_invitations) == 0:
         out_invitations = []
+    out_requests = ClashRequest.query.filter(
+        ClashRequest.candidate_id.in_(profiles_id)).all()
+    if len(out_requests) == 0:
+        out_requests = []
     form = AnswerForm()
-    return render_template('mailbox.html', form=form, in_invitations=in_invitations, out_invitations=out_invitations, get_server_short_name=get_server_short_name, user=user)
+    return render_template('mailbox.html', form=form, in_invitations=in_invitations, in_requests=in_requests, out_invitations=out_invitations, out_requests=out_requests, get_server_short_name=get_server_short_name, user=user)
+
+# ścieżka odpowiedzi na wpływające zaproszenia,
 
 
-@app.route('/user/<username>/mailbox/answer', methods=['GET', 'POST'])
+@app.route('/user/<username>/mailbox/invitations/answer', methods=['GET', 'POST'])
 @login_required
-def answer(username):
+def inv_answer(username):
     user = User.query.filter_by(username=username).first_or_404()
     form = AnswerForm()
     if form.validate_on_submit():
@@ -334,7 +341,8 @@ def answer(username):
         elif form.accept_button.data:
             team_to_join = ClashTeam.query.filter_by(
                 id=reviewd_invitation.futureteam_id).first_or_404()
-            join_position = getattr(team_to_join, reviewd_invitation.role.lower())
+            join_position = getattr(
+                team_to_join, reviewd_invitation.role.lower())
             new_teammember = Profile.query.filter_by(
                 id=reviewd_invitation.guestprofile_id).first_or_404()
             if join_position is not None:
@@ -349,17 +357,19 @@ def answer(username):
                 elif reviewd_invitation.role == 'Bottom':
                     team_to_join.add_bottom(new_teammember.nickname)
                 else:
-                    reviewd_invitation.role.add_support(new_teammember.nickname)
+                    team_to_join.add_support(new_teammember.nickname)
                 flash('You have joined the team successfully.', 'success')
                 db.session.delete(reviewd_invitation)
                 db.session.add(team_to_join)
                 db.session.commit()
     return redirect(url_for('mailbox', username=user.username))
 
-#wycofywanie zaproszeń
-@app.route('/user/<username>/mailbox/answer/del', methods=['GET', 'POST'])
+# ścieżka wycofywania wysłanych zaproszeń,
+
+
+@app.route('/user/<username>/mailbox/invitations/answer/withdrawal', methods=['GET', 'POST'])
 @login_required
-def answerdel(username):
+def inv_withdrawal(username):
     user = User.query.filter_by(username=username).first_or_404()
     form = AnswerForm()
     if form.validate_on_submit():
@@ -374,6 +384,129 @@ def answerdel(username):
     return redirect(url_for('mailbox', username=user.username))
 
 
+# ścieżka odpowiedzi na wpływające prośby,
+@app.route('/user/<username>/mailbox/requests/answer', methods=['GET', 'POST'])
+@login_required
+def req_answer(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    form = AnswerForm()
+    if form.validate_on_submit():
+        in_req_id = request.form['id_in']
+        reviewd_req = ClashRequest.query.filter_by(
+            id=in_req_id).first_or_404()
+        if form.reject_button.data:
+            db.session.delete(reviewd_req)
+            db.session.commit()
+            flash('The request has been rejected.', 'message')
+        elif form.accept_button.data:
+            team_to_join = ClashTeam.query.filter_by(
+                id=reviewd_req.desired_team_id).first_or_404()
+            join_position = getattr(team_to_join, reviewd_req.role.lower())
+            new_teammember = Profile.query.filter_by(
+                id=reviewd_req.candidate_id).first_or_404()
+            if join_position is not None:
+                flash('This position is already taken', 'error')
+            else:
+                if reviewd_req.role == 'Toplane':
+                    team_to_join.add_top(new_teammember.nickname)
+                elif reviewd_req.role == 'Jungle':
+                    team_to_join.add_jungle(new_teammember.nickname)
+                elif reviewd_req.role == 'Midlane':
+                    team_to_join.add_midlane(new_teammember.nickname)
+                elif reviewd_req.role == 'Bottom':
+                    team_to_join.add_bottom(new_teammember.nickname)
+                else:
+                    team_to_join.add_support(new_teammember.nickname)
+                flash('You have joined the team successfully.', 'success')
+                db.session.delete(reviewd_req)
+                db.session.add(team_to_join)
+                db.session.commit()
+    return redirect(url_for('mailbox', username=user.username))
+
+
+# ścieżka wycofywania wysłanych próśb,
+@app.route('/user/<username>/mailbox/requests/answer/withdrawal', methods=['GET', 'POST'])
+@login_required
+def req_withdrawal(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    form = AnswerForm()
+    if form.validate_on_submit():
+        if form.delete_button.data:
+            out_req_id = request.form['id_out']
+            del_req = ClashRequest.query.filter_by(
+                id=out_req_id).first_or_404()
+            db.session.delete(del_req)
+            db.session.commit()
+            flash('Invitation deleted successfully.', 'success')
+    return redirect(url_for('mailbox', username=user.username))
+
+
+# ścieżka wysyłania prośby o dołączenie do drużyny 1/2
+@app.route('/jointeam/<int:team_id>', methods=['GET', 'POST'])
+@login_required
+def jointeam(team_id):
+    user = User.query.filter_by(username=current_user.username).first_or_404()
+    req_team = ClashTeam.query.filter_by(id=team_id).first_or_404()
+    profiles = Profile.query.filter(
+        Profile.user_id == user.id, Profile.server == req_team.host.server).all()
+    clash_columns = [column.key for column in inspect(ClashTeam).columns]
+    none_attrs = [attr for attr in clash_columns if getattr(
+        req_team, attr) is None]
+    print(none_attrs)
+    form = RequestForm(roles=none_attrs, profiles=profiles)
+    return render_template('jointeam.html', form=form, user=user, req_team=req_team, profiles=profiles)
+
+# ścieżka wysyłania prośby o dołączenie do drużyny 2/2
+
+
+@app.route('/join/team/<int:team_id>', methods=['GET', 'POST'])
+@login_required
+def requests(team_id):
+    user = User.query.filter_by(username=current_user.username).first_or_404()
+    req_team = ClashTeam.query.filter_by(id=team_id).first_or_404()
+    profiles = Profile.query.filter(
+        Profile.user_id == user.id, Profile.server == req_team.host.server).all()
+    clash_columns = [column.key for column in inspect(ClashTeam).columns]
+    none_attrs = [attr for attr in clash_columns if getattr(
+        req_team, attr) is None]
+    form = RequestForm(roles=none_attrs, profiles=profiles)
+    if form.validate_on_submit():
+        new_req = ClashRequest(
+            role=form.role.data,
+            desired_team_id=request.form['req_team_id'],
+            team_host=request.form['team_host_id'],
+            candidate_id=form.profile.data)
+        db.session.add(new_req)
+        db.session.commit()
+        flash('Your request has been sent', 'success')
+        return redirect(url_for('findteam'))
+    return redirect(url_for('findteam'))
+
+
+# ścieżka usuwania członków drużyny,
+@app.route('/user/<username>/team/<int:team_id>/<position>/delete', methods=['GET', 'POST'])
+@login_required
+# stworzyć przekierowanie w ścieżce drużyny oraz na liście drużyn, których jesteś hostem
+def delete_teammate(username, team_id, position):
+    user = User.query.filter_by(username=username).first_or_404()
+    team_to_update = ClashTeam.query.filter_by(id=team_id).first_or_404()
+    role = position.title()
+    if role == 'Toplane':
+        team_to_update.toplane = None
+    elif role == 'Jungle':
+        team_to_update.jungle = None
+    elif role == 'Midlane':
+        team_to_update.midlane = None
+    elif role == 'Bottom':
+        team_to_update.bottom = None
+    else:
+        team_to_update.support = None
+    db.session.add(team_to_update)
+    db.session.commit()
+    flash('Teammate deleted successfully.', 'success')
+    return redirect(url_for('team', teamid=team_id))
+
+
 # ścieżka wylogowywująca użytkownika
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
@@ -381,3 +514,36 @@ def logout():
     logout_user()
     flash('You have been logged out.', 'success')
     return redirect(url_for('index'))
+
+
+def delete_expired_clashes():
+    current_time = datetime.now()
+    expired_clashes = ClashTeam.query.filter(
+        ClashTeam.clash_date < current_time).all()
+    for clash in expired_clashes:
+        db.session.delete(clash)
+    db.session.commit()
+
+
+def delete_expired_invitations():
+    current_time = datetime.now()
+    expired_invitations = ClashInvitation.query.join(
+        ClashTeam).filter(ClashTeam.clash_date < current_time).all()
+    for invitation in expired_invitations:
+        db.session.delete(invitation)
+    db.session.commit()
+
+
+def delete_expired_requests():
+    current_time = datetime.now()
+    expired_invitations = ClashRequest.query.join(
+        ClashTeam).filter(ClashTeam.clash_date < current_time).all()
+    for invitation in expired_invitations:
+        db.session.delete(invitation)
+    db.session.commit()
+
+# scheduler = BackgroundScheduler()
+# scheduler.add_job(delete_expired_invitations, 'interval', minutes=1)
+# scheduler.add_job(delete_expired_requests, 'interval', minutes=1)
+# scheduler.add_job(delete_expired_clashes, 'interval', minutes=1)
+# scheduler.start()

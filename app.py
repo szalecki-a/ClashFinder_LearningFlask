@@ -16,7 +16,7 @@ login.init_app(app)
 login.login_view = 'login'
 
 
-import routes, models
+import routes
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -2,34 +2,33 @@
 {% extends "base.html" %}
 <!-- begin block content here -->
 {% block content %}
-        <!-- searching teams bar -->
-		{% if current_user.id == user.id %}
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-6">
-					<h2>Invite {{ inv_guest.nickname | title }}</h2>
-					<form method="POST" action="{{ url_for('sendinvitation', user_id=user.id, guest_id=inv_guest.id) }}">
-						{{ form.hidden_tag() }}
-						<div class="row">
-							<div class="col-md-3">
-							  {{ form.clashteam.label(class="form-control-label") }}
-							  {{ form.clashteam(class="form-control form-control-sm") }}
-							</div>
-							<div class="col-md-3">
-							  {{ form.role.label(class="form-control-label") }}
-							  {{ form.role(class="form-control form-control-sm") }}
-							</div>
-							<div class="col-md-3">
-								<button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
-							</div>
-						</div>
-					</form>
+<!-- searching teams bar -->
+{% if current_user.id == user.id %}
+<div class="container">
+	<div class="row">
+		<div class="col-sm-6">
+			<h2>Invite {{ inv_guest.nickname | title }}</h2>
+			<form method="POST" action="{{ url_for('sendinvitation', user_id=user.id, guest_id=inv_guest.id) }}">
+				{{ form.hidden_tag() }}
+				<div class="row">
+					<div class="col-md-3">
+						{{ form.clashteam.label(class="form-control-label") }}
+						{{ form.clashteam(class="form-control form-control-sm") }}
+					</div>
+					<div class="col-md-3">
+						{{ form.role.label(class="form-control-label") }}
+						{{ form.role(class="form-control form-control-sm") }}
+					</div>
+					<div class="col-md-3">
+						<button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+					</div>
 				</div>
-			</div>
+			</form>
 		</div>
-		{% else %}
-		<p>You do not have access to this page.</p>
-		{% endif %}
+	</div>
+</div>
+{% else %}
+<p>You do not have access to this page.</p>
+{% endif %}
 <!-- end block content here -->
 {% endblock %}
-				
