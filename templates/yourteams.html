@@ -29,7 +29,7 @@
 					width: calc(100% / 9);
 				}
 			</style>
-			<!-- Lista dodanych profili -->
+			<!-- Lista druzyn jako host -->
 			<div class="teams-info">
 				{% if user_clashteams %}
 				<table>
@@ -127,6 +127,7 @@
 				{% endif %}
 			</div>
 			<div style="height: 20px;"></div>
+			<!-- Lista druzyn jako gość -->
 			<h2>Teams you are part of</h2>
 			<div class="teams-info">
 				{% if guest_teams %}
@@ -151,9 +152,10 @@
 							<td>{{ guest_team.host.server }}</td>
 							<td>
 								{% if guest_team.toplane %}
-								<a
-									href="{{ url_for('profile', nickname=guest_team.toplane, server=get_server_short_name(guest_team.host.server).lower()) }}">{{
-									guest_team.toplane }}</a>
+								<a href="{{ url_for('profile', nickname=guest_team.toplane, server=get_server_short_name(guest_team.host.server).lower()) }}">{{ guest_team.toplane }}</a>
+									{% if user.profiles.filter_by(nickname=guest_team.toplane, server=guest_team.host.server).all() %}
+										<a href="{{ url_for('leave_team',username=user.username, team_id=guest_team.id, profile=guest_team.toplane) }}">leave</a>
+									{% endif %}
 								{% else %}
 								<a></a>
 								{% endif %}
@@ -163,6 +165,9 @@
 								<a
 									href="{{ url_for('profile', nickname=guest_team.jungle, server=get_server_short_name(guest_team.host.server).lower()) }}">{{
 									guest_team.jungle }}</a>
+									{% if user.profiles.filter_by(nickname=guest_team.jungle, server=guest_team.host.server).all() %}
+										<a href="{{ url_for('leave_team',username=user.username, team_id=guest_team.id, profile=guest_team.jungle) }}">leave</a>
+									{% endif %}
 								{% else %}
 								<a></a>
 								{% endif %}
@@ -172,6 +177,9 @@
 								<a
 									href="{{ url_for('profile', nickname=guest_team.midlane, server=get_server_short_name(guest_team.host.server).lower()) }}">{{
 									guest_team.midlane }}</a>
+									{% if user.profiles.filter_by(nickname=guest_team.midlane, server=guest_team.host.server).all() %}
+										<a href="{{ url_for('leave_team',username=user.username, team_id=guest_team.id, profile=guest_team.midlane) }}">leave</a>
+									{% endif %}
 								{% else %}
 								<a></a>
 								{% endif %}
@@ -181,6 +189,9 @@
 								<a
 									href="{{ url_for('profile', nickname=guest_team.bottom, server=get_server_short_name(guest_team.host.server).lower()) }}">{{
 									guest_team.bottom }}</a>
+										{% if user.profiles.filter_by(nickname=guest_team.bottom, server=guest_team.host.server).all() %}
+										<a href="{{ url_for('leave_team',username=user.username, team_id=guest_team.id, profile=guest_team.bottom) }}">leave</a>
+									{% endif %}
 								{% else %}
 								<a></a>
 								{% endif %}
@@ -190,6 +201,9 @@
 								<a
 									href="{{ url_for('profile', nickname=guest_team.support, server=get_server_short_name(guest_team.host.server).lower()) }}">{{
 									guest_team.support }}</a>
+									{% if user.profiles.filter_by(nickname=guest_team.support, server=guest_team.host.server).all() %}
+										<a href="{{ url_for('leave_team',username=user.username, team_id=guest_team.id, profile=guest_team.support) }}">leave</a>
+									{% endif %}
 								{% else %}
 								<a></a>
 								{% endif %}

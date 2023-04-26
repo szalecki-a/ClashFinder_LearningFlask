@@ -52,6 +52,8 @@
 								{% if current_user.id == team.host.user_id and team.toplane != team.host.nickname %}
 								<a
 									href="{{ url_for('delete_teammate', username=current_user.username, team_id=team.id, position='toplane') }}">delete</a>
+								{% elif current_user.profiles.filter_by(nickname=team.toplane, server=team.host.server).all() %}
+								<a href="{{ url_for('leave_team', username=current_user.username, team_id=team.id, profile=team.toplane) }}">leave</a>
 								{% endif %}
 								{% else %}
 								{% if current_user.id == team.host.user_id %}
@@ -68,6 +70,8 @@
 								{% if current_user.id == team.host.user_id and team.jungle != team.host.nickname %}
 								<a
 									href="{{ url_for('delete_teammate', username=current_user.username, team_id=team.id, position='jungle') }}">delete</a>
+								{% elif current_user.profiles.filter_by(nickname=team.jungle, server=team.host.server).all() %}
+								<a href="{{ url_for('leave_team', username=current_user.username, team_id=team.id, profile=team.jungle) }}">leave</a>
 								{% endif %}
 								{% else %}
 								{% if current_user.id == team.host.user_id %}
@@ -84,6 +88,8 @@
 								{% if current_user.id == team.host.user_id and team.midlane != team.host.nickname %}
 								<a
 									href="{{ url_for('delete_teammate', username=current_user.username, team_id=team.id, position='midlane') }}">delete</a>
+								{% elif current_user.profiles.filter_by(nickname=team.midlane, server=team.host.server).all() %}
+								<a href="{{ url_for('leave_team', username=current_user.username, team_id=team.id, profile=team.midlane) }}">leave</a>
 								{% endif %}
 								{% else %}
 								{% if current_user.id == team.host.user_id %}
@@ -100,6 +106,8 @@
 								{% if current_user.id == team.host.user_id and team.bottom != team.host.nickname %}
 								<a
 									href="{{ url_for('delete_teammate', username=current_user.username, team_id=team.id, position='bottom') }}">delete</a>
+								{% elif current_user.profiles.filter_by(nickname=team.bottom, server=team.host.server).all() %}
+								<a href="{{ url_for('leave_team', username=current_user.username, team_id=team.id, profile=team.bottom) }}">leave</a>
 								{% endif %}
 								{% else %}
 								{% if current_user.id == team.host.user_id %}
@@ -116,6 +124,8 @@
 								{% if current_user.id == team.host.user_id and team.support != team.host.nickname %}
 								<a
 									href="{{ url_for('delete_teammate', username=current_user.username, team_id=team.id, position='support') }}">delete</a>
+								{% elif current_user.profiles.filter_by(nickname=team.support, server=team.host.server).all() %}
+								<a href="{{ url_for('leave_team', username=current_user.username, team_id=team.id, profile=team.support) }}">leave</a>
 								{% endif %}
 								{% else %}
 								{% if current_user.id == team.host.user_id %}

@@ -153,7 +153,7 @@ class InvitePlayer(FlaskForm):
     def __init__(self, user_teams, *args, **kwargs):
         super(InvitePlayer, self).__init__(*args, **kwargs)
         self.clashteam.choices = [
-            (p.host.id, f'{p.clash_date} - {p.host.server}') for p in user_teams]
+            (p.id, f'{p.clash_date} - {p.host.server}') for p in user_teams]
 
 
 # klasa prośby o dołączanie do drużyny
