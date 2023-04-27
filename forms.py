@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, SelectMultipleField, HiddenField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, SelectMultipleField, HiddenField, DateField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
 from models import Profile
 from wtforms import DateTimeLocalField
@@ -121,6 +121,7 @@ class SearchingTeam(FlaskForm):
                           DataRequired()], choices=[], default=None)
     role = SelectField('Select Role', choices=positions)
     division = SelectField('Host Division', choices=divisions)
+    date = DateField('Date', format='%Y-%m-%d')
     submit = SubmitField('Search')
 
     def __init__(self, user_id, *args, **kwargs):

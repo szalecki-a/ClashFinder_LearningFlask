@@ -1,4 +1,0 @@
-- uniemożliwiać zapraszanie tego samego profilu do tego samego teamu
-        powielanie się próśb o dołączenie oraz zaproszeń (zaproszenie z prośbą również) zablokowane,ale wciąż można zaprosić kogoś nawet jak jest w teamie
-- dodać ostrzeżenie dołączania do drużyny, kiedy dołączasz do niej a masz już w tym terminie inną drużynę
-- dodać filtr po dacie
