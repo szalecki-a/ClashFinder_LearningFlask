@@ -64,12 +64,12 @@
 		<ul class="navbar-nav ml-auto">
 			{% if current_user.is_authenticated %}
 			<li class="nav-item">
-				<form method="post" action="{{ url_for('mailbox', username = user.username) }}">
+				<form method="post" action="{{ url_for('mailbox', username = current_user.username) }}">
 					<button type="submit" class="btn btn-link nav-link">Mailbox</button>
 				</form>
 			</li>
 			<li class="nav-item">
-				<form method="post" action="{{ url_for('user', username = user.username) }}">
+				<form method="post" action="{{ url_for('user', username = current_user.username) }}">
 					<button type="submit" class="btn btn-link nav-link">Profile</button>
 				</form>
 			</li>

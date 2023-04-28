@@ -13,9 +13,11 @@ from apscheduler.schedulers.background import BackgroundScheduler
 def index():
     return render_template('index.html', user=current_user)
 
+
 @app.route('/about', methods=['GET', 'POST'])
 def about():
     return render_template('about.html', user=current_user)
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -24,7 +26,8 @@ def register():
         return redirect(url_for('user', username=current_user.username))
     form = RegistrationForm()
     if form.validate_on_submit():
-        existing_username = User.query.filter_by(username=form.username.data).first()
+        existing_username = User.query.filter_by(
+            username=form.username.data).first()
         existing_email = User.query.filter_by(email=form.email.data).first()
         if existing_username is not None:
             flash('A account with this username already exists on this server.', 'error')
@@ -109,7 +112,8 @@ def edit_profile(username, profile_id):
     form1 = EditProfileForm()
     form2 = DeleteProfileForm()
     if form1.validate_on_submit():
-        existing_profile = Profile.query.filter_by(nickname=form1.nickname.data, server=form1.server.data).first()
+        existing_profile = Profile.query.filter_by(
+            nickname=form1.nickname.data, server=form1.server.data).first()
         if existing_profile is not None:
             flash('A profile with this nickname already exists on this server.', 'error')
         else:
@@ -131,31 +135,16 @@ def edit_profile(username, profile_id):
     return render_template('profile_edit.html', profile=profile, form1=form1, form2=form2, user=user)
 
 
-# ścieżka usuwania profilu
-@app.route('/user/<username>/<int:profile_id>/delete_profile', methods=['GET', 'POST'])
-@login_required
-def delete_profile(username, profile_id):
-    user = User.query.filter_by(username=username).first_or_404()
-    profile = Profile.query.filter_by(id=profile_id)
-    form = EditProfileForm()
-    if form.validate_on_submit():
-        if form.delete_button.data:
-            db.session.delete(profile)
-            db.session.commit()
-            flash('Your profile has been deleted.', 'message')
-        else:
-            flash('xxxxxxxxxxxxxxxx', 'error')
-    return redirect(url_for('user', username=user.username))
-
-
 # ścieżka strony profilu
 @app.route('/profile/<server>/<nickname>', methods=['GET', 'POST'])
 @login_required
 def profile(server, nickname):
+    user = User.query.join(Profile).filter(Profile.nickname == nickname,
+                                           Profile.server == get_server_name_from_short(server.upper())).first()
     serv = get_server_name_from_short(server.upper())
     profile = Profile.query.filter_by(
         server=serv, nickname=nickname).first_or_404()
-    return render_template('profile.html', server=server, profile=profile, user=current_user, get_server_short_name=get_server_short_name)
+    return render_template('profile.html', server=server, profile=profile, user=user, get_server_short_name=get_server_short_name)
 
 
 # ścieżka drużyn stworzonych przez użytkownika,
@@ -180,7 +169,6 @@ def yourteams(username):
 
 
 # ścieżka pozwalająca tworzyć drużyny i przekierowywuje spowrotem na stronę drużyn użytkownika
-# rozszerzyć o sprawdzanie daty tworzenia drużyny, może dodać pole z rokiem...
 @app.route('/user/<username>/createteam', methods=['GET', 'POST'])
 @login_required
 def createteam(username):
@@ -243,9 +231,11 @@ def delete_teammate(username, team_id, position):
 def leave_team(username, team_id, profile):
     user = User.query.filter_by(username=username).first_or_404()
     team_to_leave = ClashTeam.query.filter_by(id=team_id).first_or_404()
-    leaving_profile = Profile.query.filter_by(nickname=profile, user_id=user.id).first_or_404()
+    leaving_profile = Profile.query.filter_by(
+        nickname=profile, user_id=user.id).first_or_404()
     team_columns = [column.key for column in inspect(ClashTeam).columns]
-    leaving_roles = [role for role in team_columns if getattr(team_to_leave, role) == leaving_profile.nickname]
+    leaving_roles = [role for role in team_columns if getattr(
+        team_to_leave, role) == leaving_profile.nickname]
     for leaving_role in leaving_roles:
         if leaving_role.title() == 'Toplane':
             team_to_leave.toplane = None
@@ -316,18 +306,23 @@ def sendinvitation(user_id, guest_id):
         inv_for_team = ClashTeam.query.filter_by(
             id=form.clashteam.data).first_or_404()
         inv_for_position = getattr(inv_for_team, form.role.data.lower())
-        existing_invitation = ClashInvitation.query.join(Profile).filter(ClashInvitation.futureteam_id==inv_for_team.id, Profile.user_id==inv_guest.user_id).all()
-        existing_request = ClashRequest.query.filter(ClashRequest.desired_team_id==inv_for_team.id, ClashRequest.team_host==user.id).all()
-        guests_profiles_on_serwer = Profile.query.filter_by(user_id=inv_guest.user_id, server=inv_for_team.host.server).all()
+        existing_invitation = ClashInvitation.query.join(Profile).filter(
+            ClashInvitation.futureteam_id == inv_for_team.id, Profile.user_id == inv_guest.user_id).all()
+        existing_request = ClashRequest.query.filter(
+            ClashRequest.desired_team_id == inv_for_team.id, ClashRequest.team_host == user.id).all()
+        guests_profiles_on_serwer = Profile.query.filter_by(
+            user_id=inv_guest.user_id, server=inv_for_team.host.server).all()
         for profile in guests_profiles_on_serwer:
-            role_in_team = [role for role in role_columns if getattr(inv_for_team, role) == profile.nickname]
+            role_in_team = [role for role in role_columns if getattr(
+                inv_for_team, role) == profile.nickname]
             if role_in_team:
                 user_role_in_team.extend(role_in_team)
         if inv_for_position is not None:
             flash('This position in your team is already taken', 'error')
             return redirect(url_for('inviteteammates', user_id=user_id, guest_id=guest_id))
         elif len(existing_invitation) > 0:
-            flash(f"You have already sent an invitation to this team for this user's profile.", 'error')
+            flash(
+                f"You have already sent an invitation to this team for this user's profile.", 'error')
         elif len(existing_request) > 0:
             flash("You have received a request to join this team from this user", 'error')
         elif len(user_role_in_team) > 0:
@@ -425,25 +420,31 @@ def jointeam(team_id):
 def requests(team_id):
     user = User.query.filter_by(username=current_user.username).first_or_404()
     req_team = ClashTeam.query.filter_by(id=team_id).first_or_404()
-    profiles = Profile.query.filter(Profile.user_id == user.id, Profile.server == req_team.host.server).all()
+    profiles = Profile.query.filter(
+        Profile.user_id == user.id, Profile.server == req_team.host.server).all()
     clash_columns = [column.key for column in inspect(ClashTeam).columns]
     role_columns = ['toplane', 'jungle', 'midlane', 'bottom', 'support']
     none_attrs = [attr for attr in clash_columns if getattr(
         req_team, attr) is None]
     user_role_in_team = []
     for profile in profiles:
-        role_in_team = [role for role in role_columns if getattr(req_team, role) == profile.nickname]
+        role_in_team = [role for role in role_columns if getattr(
+            req_team, role) == profile.nickname]
         if role_in_team:
             user_role_in_team.extend(role_in_team)
     form = RequestForm(roles=none_attrs, profiles=profiles)
     if form.validate_on_submit():
-        candidate_profile = Profile.query.filter_by(id = form.profile.data).first_or_404()
-        existing_request = ClashRequest.query.join(Profile).filter(ClashRequest.desired_team_id==request.form['req_team_id'], Profile.user_id==candidate_profile.user_id).all()
-        existing_invitation = ClashInvitation.query.filter(ClashInvitation.futureteam_id==request.form['req_team_id'], ClashInvitation.lider_id==req_team.host.user_id).all()
+        candidate_profile = Profile.query.filter_by(
+            id=form.profile.data).first_or_404()
+        existing_request = ClashRequest.query.join(Profile).filter(
+            ClashRequest.desired_team_id == request.form['req_team_id'], Profile.user_id == candidate_profile.user_id).all()
+        existing_invitation = ClashInvitation.query.filter(
+            ClashInvitation.futureteam_id == request.form['req_team_id'], ClashInvitation.lider_id == req_team.host.user_id).all()
         if len(existing_request) > 0:
             flash("You have already sent a request to join this team.", 'error')
         elif len(existing_invitation) > 0:
-            flash("You have received an invitation from a user to join this team.", 'error')
+            flash(
+                "You have received an invitation from a user to join this team.", 'error')
         elif len(user_role_in_team) > 0:
             flash("You are already a member of this team", 'error')
         else:
@@ -555,22 +556,22 @@ def findteam():
 
         if form.role.data == 'Toplane':
             clash_teams = ClashTeam.query.join(Profile).filter(Profile.division.in_(
-                div), ClashTeam.toplane.is_(None), ClashTeam.clash_date>=start_date, ClashTeam.clash_date<=end_date).order_by(ClashTeam.clash_date).all()
+                div), ClashTeam.toplane.is_(None), ClashTeam.clash_date >= start_date, ClashTeam.clash_date <= end_date).order_by(ClashTeam.clash_date).all()
         elif form.role.data == 'Jungle':
             clash_teams = ClashTeam.query.join(Profile).filter(Profile.division.in_(
-                div), ClashTeam.jungle.is_(None), ClashTeam.clash_date>=start_date, ClashTeam.clash_date<=end_date).order_by(ClashTeam.clash_date).all()
+                div), ClashTeam.jungle.is_(None), ClashTeam.clash_date >= start_date, ClashTeam.clash_date <= end_date).order_by(ClashTeam.clash_date).all()
         elif form.role.data == 'Midlane':
             clash_teams = ClashTeam.query.join(Profile).filter(Profile.division.in_(
-                div), ClashTeam.midlane.is_(None), ClashTeam.clash_date>=start_date, ClashTeam.clash_date<=end_date).order_by(ClashTeam.clash_date).all()
+                div), ClashTeam.midlane.is_(None), ClashTeam.clash_date >= start_date, ClashTeam.clash_date <= end_date).order_by(ClashTeam.clash_date).all()
         elif form.role.data == 'Bottom':
             clash_teams = ClashTeam.query.join(Profile).filter(Profile.division.in_(
-                div), ClashTeam.bottom.is_(None), ClashTeam.clash_date>=start_date, ClashTeam.clash_date<=end_date).order_by(ClashTeam.clash_date).all()
+                div), ClashTeam.bottom.is_(None), ClashTeam.clash_date >= start_date, ClashTeam.clash_date <= end_date).order_by(ClashTeam.clash_date).all()
         elif form.role.data == 'Support':
             clash_teams = ClashTeam.query.join(Profile).filter(Profile.division.in_(
-                div), ClashTeam.support.is_(None), ClashTeam.clash_date>=start_date, ClashTeam.clash_date<=end_date).order_by(ClashTeam.clash_date).all()
+                div), ClashTeam.support.is_(None), ClashTeam.clash_date >= start_date, ClashTeam.clash_date <= end_date).order_by(ClashTeam.clash_date).all()
         else:
             clash_teams = ClashTeam.query.join(Profile).filter(
-                Profile.division.in_(div), ClashTeam.clash_date>=start_date, ClashTeam.clash_date<=end_date).order_by(ClashTeam.clash_date).all()
+                Profile.division.in_(div), ClashTeam.clash_date >= start_date, ClashTeam.clash_date <= end_date).order_by(ClashTeam.clash_date).all()
     return render_template('findteam.html', get_server_short_name=get_server_short_name, clash_teams=clash_teams, form=form, user=user)
 
 
@@ -627,9 +628,6 @@ def logout():
     logout_user()
     flash('You have been logged out.', 'success')
     return redirect(url_for('index'))
-
-
-
 
 
 def delete_expired_clashes():

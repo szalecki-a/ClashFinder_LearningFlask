@@ -120,6 +120,8 @@ class ClashInvitation(UserMixin, db.Model):
         db.Integer, db.ForeignKey('profile.id'), nullable=False)
 
 # Klasa prósb
+
+
 class ClashRequest(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     role = db.Column(db.String(20), index=True)

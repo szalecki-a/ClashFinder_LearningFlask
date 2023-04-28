@@ -95,10 +95,9 @@ class EditProfileForm(FlaskForm):
                                    DataRequired(), DifferentRole('pref_role')])
     submit = SubmitField('Edit Profile')
 
+
 class DeleteProfileForm(FlaskForm):
     delete_button = SubmitField('Delete Profile')
-
-
 
 
 class CreatingTeam(FlaskForm):
