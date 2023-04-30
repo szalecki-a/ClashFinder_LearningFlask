@@ -1,0 +1,38 @@
+heroku login
+git init
+heroku create**  -  heroku git:remote -a murmuring-lake-21275
+pip install psycopg2**
+pip install gunicorn**
+pip freeze > requirements.txt*
+git add .
+git commit -m "initial commit"
+git push heroku master
+
+
+heroku run python
+from app import db ***
+
+
+
+- przy każdym uruchomieniu
+
+heroku login
+git init
++aktywacja środowiska 
+
+
+-przy każdej zmianie:
+git add .
+git commit -m "komentarz"
+git push (heroku master)
+
+heroku open do otworzenia strony
+
+
+
+
+Or push a context manually if using a plain python shell.
+$ python
+>>> from app import app, db
+>>> app.app_context().push()
+>>> db.create_all()

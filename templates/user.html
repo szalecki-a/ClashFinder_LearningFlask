@@ -1,0 +1,126 @@
+<!-- extend from "base.html" here -->
+{% extends "base.html" %}
+<!-- begin block content here -->
+{% block content %}
+<!-- account info -->
+<div class="container">
+	<div class="row">
+		<div class="col-sm-6">
+			<h2>{{ user.username | title }}</h2>
+			{% if current_user.id == user.id %}
+			<div class="account-info">
+				<div class="form-group row">
+					<label for="username" class="col-sm-4 col-form-label">Username:</label>
+					<div class="col-sm-8">
+						<div class="form-control">{{ user.username }}</div>
+					</div>
+				</div>
+			</div>
+			<div class="account-info">
+				<div class="form-group row">
+					<label for="email" class="col-sm-4 col-form-label">Email:</label>
+					<div class="col-sm-8">
+						<div class="form-control">{{ user.email }}</div>
+					</div>
+				</div>
+			</div>
+			{% endif %}
+			<style>
+				table {
+					border-collapse: collapse;
+					font-size: 0.9em;
+					border: 1px solid #ddd;
+				}
+
+				th {
+					border: 1px solid #ddd;
+					padding: 8px;
+					text-align: center;
+				}
+
+				td {
+					border: 1px solid #ddd;
+					padding: 8px;
+					text-align: center;
+				}
+			</style>
+			<!-- Przycisk twoich drużyn -->
+			{% if current_user.id == user.id %}
+			<a href="{{ url_for('yourteams', username=user.username) }}" class="btn btn-primary btn-lg">Your Clash
+				Teams</a>
+			{% endif %}
+			<!-- Lista dodanych profili -->
+			{% if profiles %}
+			<div class="account-info">
+				<label for="profiles">
+					<h2>Profiles</h2>
+				</label>
+				<table>
+					<thead>
+						<tr>
+							<th><strong>Lp.</strong></th>
+							<th><strong>Nickname</strong></th>
+							<th><strong>Server</strong></th>
+							<th><strong>Division</strong></th>
+							<th><strong>Best position</strong></th>
+							<th><strong>Alternative position</strong></th>
+							{% if current_user.id == user.id %}
+							<td></td>
+							{% endif %}
+						</tr>
+					</thead>
+					<tbody>
+						{% for profile in profiles %}
+						<tr>
+							<td>{{ loop.index }}</td>
+							<td><a
+									href="{{ url_for('profile', nickname=profile.nickname, server=get_server_short_name(profile.server).lower()) }}">{{
+									profile.nickname }}</a></td>
+							<td>{{ profile.server }}</td>
+							<td>{{ profile.division }}</td>
+							<td>{{ profile.best_position }}</td>
+							<td>{{ profile.alternative_position }}</td>
+							{% if current_user.id == user.id %}
+							<td><a href="{{ url_for('edit_profile', username=user.username, profile_id=profile.id) }}">edit</a></td>
+							{% endif %}
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+			{% else %}
+			<p>Currently you do not have any Profiles.</p>
+			{% endif %}
+			{% if current_user.id == user.id %}
+			<div style="height: 20px;"></div>
+			<h2>Add another profile</h2>
+			<form method="POST" action="{{ url_for('create_profile', username=user.username) }}">
+				{{ form.hidden_tag() }}
+				<div class="form-group">
+					{{ form.nickname.label(class="form-control-label") }}
+					{{ form.nickname(class="form-control form-control-sm") }}
+				</div>
+				<div class="form-group">
+					{{ form.server.label(class="form-control-label") }}
+					{{ form.server(class="form-control form-control-sm") }}
+				</div>
+				<div class="form-group">
+					{{ form.division.label(class="form-control-label") }}
+					{{ form.division(class="form-control form-control-sm") }}
+				</div>
+				<div class="form-group">
+					{{ form.pref_role.label(class="form-control-label") }}
+					{{ form.pref_role(class="form-control form-control-sm") }}
+				</div>
+				<div class="form-group">
+					{{ form.alternative_role.label(class="form-control-label") }}
+					{{ form.alternative_role(class="form-control form-control-sm") }}
+				</div>
+				<button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+			</form>
+			{% endif %}
+		</div>
+	</div>
+</div>
+<!-- end block content here -->
+{% endblock %}

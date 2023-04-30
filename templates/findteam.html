@@ -1,0 +1,136 @@
+<!-- extend from "base.html" here -->
+{% extends "base.html" %}
+<!-- begin block content here -->
+{% block content %}
+<!-- searching teams bar -->
+<div class="container">
+	<div class="row">
+		<div class="col-sm-6">
+			<h2>Find Clash Team</h2>
+			<form method="POST" action="{{ url_for('findteam') }}">
+				{{ form.hidden_tag() }}
+				<div class="row">
+					<div class="col-md-3">
+						{{ form.profile.label(class="form-control-label") }}
+						{{ form.profile(class="form-control form-control-sm") }}
+					</div>
+					<div class="col-md-3">
+						{{ form.role.label(class="form-control-label") }}
+						{{ form.role(class="form-control form-control-sm") }}
+					</div>
+					<div class="col-md-3">
+						{{ form.division.label(class="form-control-label") }}
+						{{ form.division(class="form-control form-control-sm") }}
+					</div>
+					<div class="col-md-3">
+						{{ form.date.label(class="form-control-label") }}
+						{{ form.date(class="form-control form-control-sm") }}
+					</div>
+					<div class="col-md-3">
+						<button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+					</div>
+				</div>
+			</form>
+			<h2>Clash Teams</h2>
+			<style>
+				table {
+					border-collapse: collapse;
+					font-size: 0.9em;
+					border: 1px solid #ddd;
+					margin-bottom: 10px;
+				}
+
+				th {
+					border: 1px solid #ddd;
+					padding: 8px;
+					text-align: center;
+				}
+
+				td {
+					border: 1px solid #ddd;
+					padding: 8px;
+					text-align: center;
+				}
+			</style>
+			<!-- Lista dodanych profili -->
+			<div class="clash-available-teams">
+				{% if clash_teams %}
+				<table>
+					<thead>
+						<tr>
+							<th>Lp.</th>
+							<th>SERVER</th>
+							<th>TOPLANE</th>
+							<th>JUNGLE</th>
+							<th>MIDLANE</th>
+							<th>BOTTOM</th>
+							<th>SUPPORT</th>
+							<th>CLASH DATE</th>
+							<th>HOST DIVISION</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for team in clash_teams %}
+						<tr>
+							<td>{{ loop.index }}</td>
+							<td>{{ team.host.server or '' }}</td>
+							<td>
+								{% if team.toplane %}
+								<a
+									href="{{ url_for('profile', nickname=team.toplane, server=get_server_short_name(team.host.server).lower()) }}">{{
+									team.toplane }}</a>
+								{% else %}
+								<a href="{{ url_for('jointeam', team_id=team.id) }}">join</a>
+								{% endif %}
+							</td>
+							<td>
+								{% if team.jungle %}
+								<a
+									href="{{ url_for('profile', nickname=team.jungle, server=get_server_short_name(team.host.server).lower()) }}">{{
+									team.jungle }}</a>
+								{% else %}
+								<a href="{{ url_for('jointeam', team_id=team.id) }}">join</a>
+								{% endif %}
+							</td>
+							<td>
+								{% if team.midlane %}
+								<a
+									href="{{ url_for('profile', nickname=team.midlane, server=get_server_short_name(team.host.server).lower()) }}">{{
+									team.midlane }}</a>
+								{% else %}
+								<a href="{{ url_for('jointeam', team_id=team.id) }}">join</a>
+								{% endif %}
+							</td>
+							<td>
+								{% if team.bottom %}
+								<a
+									href="{{ url_for('profile', nickname=team.bottom, server=get_server_short_name(team.host.server).lower()) }}">{{
+									team.bottom }}</a>
+								{% else %}
+								<a href="{{ url_for('jointeam', team_id=team.id) }}">join</a>
+								{% endif %}
+							</td>
+							<td>
+								{% if team.support %}
+								<a
+									href="{{ url_for('profile', nickname=team.support, server=get_server_short_name(team.host.server).lower()) }}">{{
+									team.support }}</a>
+								{% else %}
+								<a href="{{ url_for('jointeam', team_id=team.id) }}">join</a>
+								{% endif %}
+							</td>
+							<td>{{ team.formatted_clash_date() or '' }}</td>
+							<td>{{ team.division or '' }}</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				{% else %}
+				<p>There are currently no teams meeting your requirements.</p>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+<!-- end block content here -->
+{% endblock %}

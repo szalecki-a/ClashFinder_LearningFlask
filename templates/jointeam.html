@@ -1,0 +1,32 @@
+<!-- extend from "base.html" here -->
+{% extends "base.html" %}
+<!-- begin block content here -->
+{% block content %}
+<!-- searching teams bar -->
+<div class="container">
+	<div class="row">
+		<div class="col-sm-6">
+			<h2>Join Team #{{ req_team.id }}</h2>
+			<form method="POST" action="{{ url_for('requests', team_id=req_team.id) }}">
+				{{ form.hidden_tag() }}
+				<div class="row">
+					<div class="col-md-3">
+						{{ form.profile.label(class="form-control-label") }}
+						{{ form.profile(class="form-control form-control-sm") }}
+					</div>
+					<div class="col-md-3">
+						{{ form.role.label(class="form-control-label") }}
+						{{ form.role(class="form-control form-control-sm") }}
+					</div>
+					<div class="col-md-3">
+						<input type="hidden" name="req_team_id" value="{{ req_team.id }}">
+						<input type="hidden" name="team_host_id" value="{{ req_team.host.user_id }}">
+						<button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<!-- end block content here -->
+{% endblock %}

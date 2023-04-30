@@ -1,0 +1,31 @@
+<!-- extend from "base.html" here -->
+{% extends "base.html" %}
+<!-- begin block content here -->
+{% block content %}
+<!-- Registration form -->
+<div class="container">
+	<h2>Registration Form</h2>
+	<form method="POST" action="{{ url_for('register') }}">
+		{{ form.hidden_tag() }}
+		<div class="form-group">
+			{{ form.username.label(class="form-control-label") }}
+			{{ form.username(class="form-control form-control-sm") }}
+		</div>
+		<div class="form-group">
+			{{ form.email.label(class="form-control-label") }}
+			{{ form.email(class="form-control form-control-sm") }}
+		</div>
+		<div class="form-group">
+			{{ form.password.label(class="form-control-label") }}
+			{{ form.password(class="form-control form-control-sm") }}
+		</div>
+		<div class="form-group">
+			{{ form.password2.label(class="form-control-label") }}
+			{{ form.password2(class="form-control form-control-sm") }}
+		</div>
+		<button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+	</form>
+	<p>If you have an account, <a href="{{ url_for('login') }}">log in here</a>.</p>
+</div>
+<!-- end block content here -->
+{% endblock %}

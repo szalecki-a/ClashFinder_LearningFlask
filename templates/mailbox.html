@@ -1,0 +1,173 @@
+<!-- extend from "base.html" here -->
+{% extends "base.html" %}
+<!-- begin block content here -->
+{% block content %}
+{% if current_user.id == user.id %}
+<style>
+    table {
+        border-collapse: collapse;
+        font-size: 0.9em;
+        border: 1px solid #ddd;
+        margin-bottom: 10px;
+    }
+
+    th {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+    }
+
+    td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+    }
+</style>
+<!-- inbox section-->
+<h2>Inbox</h2>
+<div class="mailbox">
+    {% if in_invitations or in_requests %}
+    <table>
+        <thead>
+            <tr>
+                <th>Lp.</th>
+                <th>SENDER</th>
+                <th>TEAM LIDER</th>
+                <th>LIDER DIVISION</th>
+                <th>TEAM ID</th>
+                <th>CLASH DATE</th>
+                <th>FOR POSITION</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- incoming invitations-->
+            {% for in_invitation in in_invitations %}
+            <tr>{{in_invitation.invitedguest.nickname}} invites you to join his team!</tr>
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td><a
+                        href="{{ url_for('profile', nickname=in_invitation.invitedguest.nickname, server=get_server_short_name(in_invitation.invitedguest.server).lower()) }}">{{
+                        in_invitation.invitedguest.nickname }}</a></td>
+                {% set host = in_invitation.futureteam.host %}
+                {% set server_short_name = get_server_short_name(host.server).lower() %}
+                <td><a href="{{ url_for('profile', nickname=host.nickname, server=server_short_name) }}">{{
+                        host.nickname }}</a></td>
+                <td>{{ in_invitation.futureteam.division }}</td>
+                <td><a href="{{ url_for('team', teamid=in_invitation.futureteam_id) }}">{{ in_invitation.futureteam_id
+                        }}</a></td>
+                <td>{{ in_invitation.futureteam.formatted_clash_date() }}</td>
+                <td>{{ in_invitation.role }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('inv_answer', username=user.username) }}">
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" name="id_in" value="{{ in_invitation.id }}">
+                        <button type="submit" class="btn btn-primary" name="accept">{{ form.accept_button }}</button>
+                        <button type="submit" class="btn btn-primary" name="reject">{{ form.reject_button }}</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            <!-- incoming requests-->
+            {% for in_request in in_requests %}
+            <tr>{{ in_request.candidate.nickname }} wants to join to your team!</tr>
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td><a
+                        href="{{ url_for('profile', nickname=in_request.candidate.nickname, server=get_server_short_name(in_request.candidate.server).lower()) }}">{{
+                        in_request.candidate.nickname }}</a></td>
+                {% set host = in_request.desired_team.host %}
+                {% set server_short_name = get_server_short_name(host.server).lower() %}
+                <td><a href="{{ url_for('profile', nickname=host.nickname, server=server_short_name) }}">{{
+                        host.nickname }}</a></td>
+                <td>{{ in_request.desired_team.division }}</td>
+                <td><a href="{{ url_for('team', teamid=in_request.desired_team_id) }}">{{ in_request.desired_team_id
+                        }}</a></td>
+                <td>{{ in_request.desired_team.formatted_clash_date() }}</td>
+                <td>{{ in_request.role }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('req_answer', username=user.username) }}">
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" name="id_in" value="{{ in_request.id }}">
+                        <button type="submit" class="btn btn-primary" name="accept">{{ form.accept_button }}</button>
+                        <button type="submit" class="btn btn-primary" name="reject">{{ form.reject_button }}</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Your inbox is empty.</p>
+    {% endif %}
+</div>
+<!-- outbox section-->
+<h2>Outbox</h2>
+<div class="mailbox">
+    {% if out_invitations or out_requests %}
+    <table>
+        <thead>
+            <tr>
+                <th>Lp.</th>
+                <th>RECIPIENT</th>
+                <th>FOR POSITION</th>
+                <th>TEAM ID</th>
+                <th>CLASH DATE</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- outcoming invitations-->
+            {% for out_invitation in out_invitations %}
+            <tr>Your invitation to {{ out_invitation.invitedguest.nickname }}</tr>
+            <tr>
+                <td>{{ loop.index }}</td>
+                {% set guest = out_invitation.invitedguest %}
+                {% set guest_server = get_server_short_name(guest.server).lower() %}
+                <td><a href="{{ url_for('profile', nickname=guest.nickname, server=guest_server) }}">{{
+                        out_invitation.invitedguest.nickname }}</a></td>
+                <td>{{ out_invitation.role }}</td>
+                <td><a href="{{ url_for('team', teamid=out_invitation.futureteam_id) }}">{{
+                        out_invitation.futureteam_id}}</a></td>
+                <td>{{ out_invitation.futureteam.formatted_clash_date() }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('inv_withdrawal', username=user.username) }}">
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" name="id_out" value="{{ out_invitation.id }}">
+                        <button type="submit" class="btn btn-primary">{{ form.delete_button }}</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            <!-- outcoming requests-->
+            {% for out_request in out_requests %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                {% set recipient = out_request.candidate %}
+                {% set recipient_server = get_server_short_name(recipient.server).lower() %}
+                <td><a href="{{ url_for('profile', nickname=recipient.nickname, server=recipient_server) }}">{{
+                        out_request.candidate.nickname }}</a></td>
+                <td>{{ out_request.role }}</td>
+                <td><a href="{{ url_for('team', teamid=out_request.desired_team_id) }}">{{
+                        out_request.desired_team_id}}</a></td>
+                <td>{{ out_request.desired_team.formatted_clash_date() }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('req_withdrawal', username=user.username) }}">
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" name="id_out" value="{{ out_request.id }}">
+                        <button type="submit" class="btn btn-primary">{{ form.delete_button }}</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Your outbox is empty.</p>
+    {% endif %}
+</div>
+{% else %}
+<p>You do not have access to this page.</p>
+{% endif %}
+<!-- end block content here -->
+{% endblock %}

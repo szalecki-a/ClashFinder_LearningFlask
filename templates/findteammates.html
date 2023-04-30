@@ -1,0 +1,91 @@
+<!-- extend from "base.html" here -->
+{% extends "base.html" %}
+<!-- begin block content here -->
+{% block content %}
+<!-- searching teams bar -->
+<div class="container">
+	<div class="row">
+		<div class="col-sm-6">
+			<h2>Find Your Teammates</h2>
+			<form method="POST" action="{{ url_for('findteammates') }}">
+				{{ form.hidden_tag() }}
+				<div class="row">
+					<div class="col-md-3">
+						{{ form.profile.label(class="form-control-label") }}
+						{{ form.profile(class="form-control form-control-sm") }}
+					</div>
+					<div class="col-md-3">
+						{{ form.role.label(class="form-control-label") }}
+						{{ form.role(class="form-control form-control-sm") }}
+					</div>
+					<div class="col-md-3">
+						{{ form.divisions.label(class="form-control-label") }}
+						{{ form.divisions(class="form-control form-control-sm") }}
+					</div>
+					<button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+					<br>
+				</div>
+			</form>
+			<h2>Available Players</h2>
+			<style>
+				table {
+					border-collapse: collapse;
+					font-size: 0.9em;
+					border: 1px solid #ddd;
+					margin-bottom: 10px;
+				}
+
+				th {
+					border: 1px solid #ddd;
+					padding: 8px;
+					text-align: center;
+				}
+
+				td {
+					border: 1px solid #ddd;
+					padding: 8px;
+					text-align: center;
+				}
+			</style>
+			<!-- Lista dodanych profili -->
+			<div class="clash-available-teams">
+				{% if find_teammates %}
+				<table>
+					<thead>
+						<tr>
+							<th>Lp.</th>
+							<th>NICKNAME</th>
+							<th>DIVISION</th>
+							<th>MAIN ROLE</th>
+							<th>SECONDARY POSITION</th>
+							<th>SERVER</th>
+							<th>INVITE</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for teammate in find_teammates %}
+						<tr>
+							<td>{{ loop.index }}</td>
+							<td><a
+									href="{{ url_for('profile', nickname=teammate.nickname, server=get_server_short_name(teammate.server).lower()) }}">{{
+									teammate.nickname }}</a></td>
+							<td>{{ teammate.division }}</td>
+							<td>{{ teammate.best_position }}</td>
+							<td>{{ teammate.alternative_position }}</td>
+							<td>{{ teammate.server }}</td>
+							<td><a
+									href="{{ url_for('inviteteammates', user_id=user.id, guest_id=teammate.id) }}">Invite</a>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				{% else %}
+				<p>There are currently no players meeting your requirements.</p>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</div>
+<!-- end block content here -->
+{% endblock %}

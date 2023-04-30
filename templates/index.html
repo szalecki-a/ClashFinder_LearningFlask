@@ -1,0 +1,23 @@
+<!-- extend from "base.html" here -->
+{% extends "base.html" %}
+<!-- begin block content here -->
+{% block content %}
+<!-- Main content -->
+<div class="jumbotron jumbotron-fluid">
+	<div class="container">
+		<h1>Looking for Teammates</h1>
+		<p>Find your teammates or team up to compete in the ultimate Clash tournament!</p>
+		<p>Create account and build your Dream Team</p>
+		<a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Get Started</a>
+	</div>
+</div>
+<div class="container">
+	<div class="row">
+		<div class="col-sm-6">
+			<h4>Already have an account?</h4>
+			<a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">Sign in</a>
+		</div>
+	</div>
+</div>
+<!-- end block content here -->
+{% endblock %}

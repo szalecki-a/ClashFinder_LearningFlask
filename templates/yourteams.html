@@ -1,0 +1,251 @@
+<!-- extend from "base.html" here -->
+{% extends "base.html" %}
+<!-- begin block content here -->
+{% block content %}
+<!-- teams info -->
+{% if current_user.id == user.id %}
+<div class="container">
+	<div class="row">
+		<div class="col-sm-6">
+			<h2>Your Clash Teams</h2>
+			<style>
+				table {
+					border-collapse: collapse;
+					font-size: 0.9em;
+					border: 1px solid #ddd;
+					margin-bottom: 10px;
+					width: 800px;
+				}
+
+				th {
+					border: 1px solid #ddd;
+					padding: 8px;
+					text-align: center;
+					width: calc(100% / 9);
+				}
+
+				td {
+					border: 1px solid #ddd;
+					padding: 8px;
+					text-align: center;
+					width: calc(100% / 9);
+				}
+			</style>
+			<!-- Lista druzyn jako host -->
+			<div class="teams-info">
+				{% if user_clashteams %}
+				<table>
+					<thead>
+						<tr>
+							<th><strong>Lp.</strong></th>
+							<th><strong>Server</strong></th>
+							<th><strong>TOPLANE</strong></th>
+							<th><strong>JUNGLE</strong></th>
+							<th><strong>MIDLANE</strong></th>
+							<th><strong>BOTTOM</strong></th>
+							<th><strong>SUPPORT</strong></th>
+							<th><strong>CLASH DATE</strong></th>
+							<th><strong>HOST DIVISION</strong></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for team in user_clashteams %}
+						<tr>
+							<td>{{ loop.index }}</td>
+							<td>{{ team.host.server }}</td>
+							<td>
+								{% if team.toplane %}
+								<a
+									href="{{ url_for('profile', nickname=team.toplane, server=get_server_short_name(team.host.server).lower()) }}">{{
+									team.toplane }}</a>
+								{% if user.id == team.host.user_id and team.toplane != team.host.nickname %}
+								<a
+									href="{{ url_for('delete_teammate', username=user.username, team_id=team.id, position='toplane') }}">delete</a>
+								{% endif %}
+								{% else %}
+								<a href="{{ url_for('findteammates') }}">find player</a>
+								{% endif %}
+							</td>
+							<td>
+								{% if team.jungle %}
+								<a
+									href="{{ url_for('profile', nickname=team.jungle, server=get_server_short_name(team.host.server).lower()) }}">{{
+									team.jungle }}</a>
+								{% if user.id == team.host.user_id and team.jungle != team.host.nickname %}
+								<a
+									href="{{ url_for('delete_teammate', username=user.username, team_id=team.id, position='jungle') }}">delete</a>
+								{% endif %}
+								{% else %}
+								<a href="{{ url_for('findteammates') }}">find player</a>
+								{% endif %}
+							</td>
+							<td>
+								{% if team.midlane %}
+								<a
+									href="{{ url_for('profile', nickname=team.midlane, server=get_server_short_name(team.host.server).lower()) }}">{{
+									team.midlane }}</a>
+								{% if user.id == team.host.user_id and team.midlane != team.host.nickname %}
+								<a
+									href="{{ url_for('delete_teammate', username=user.username, team_id=team.id, position='midlane') }}">delete</a>
+								{% endif %}
+								{% else %}
+								<a href="{{ url_for('findteammates') }}">find player</a>
+								{% endif %}
+							</td>
+							<td>
+								{% if team.bottom %}
+								<a
+									href="{{ url_for('profile', nickname=team.bottom, server=get_server_short_name(team.host.server).lower()) }}">{{
+									team.bottom }}</a>
+								{% if user.id == team.host.user_id and team.bottom != team.host.nickname %}
+								<a
+									href="{{ url_for('delete_teammate', username=user.username, team_id=team.id, position='bottom') }}">delete</a>
+								{% endif %}
+								{% else %}
+								<a href="{{ url_for('findteammates') }}">find player</a>
+								{% endif %}
+							</td>
+							<td>
+								{% if team.support %}
+								<a
+									href="{{ url_for('profile', nickname=team.support, server=get_server_short_name(team.host.server).lower()) }}">{{
+									team.support }}</a>
+								{% if user.id == team.host.user_id and team.support != team.host.nickname %}
+								<a
+									href="{{ url_for('delete_teammate', username=user.username, team_id=team.id, position='support') }}">delete</a>
+								{% endif %}
+								{% else %}
+								<a href="{{ url_for('findteammates') }}">find player</a>
+								{% endif %}
+							</td>
+							<td>{{ team.formatted_clash_date() or '' }}</td>
+							<td>{{ team.division or '' }}</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				{% else %}
+				<p>Currently, you are not hosting any Clash Team.</p>
+				{% endif %}
+			</div>
+			<div style="height: 20px;"></div>
+			<!-- Lista druzyn jako gość -->
+			<h2>Teams you are part of</h2>
+			<div class="teams-info">
+				{% if guest_teams %}
+				<table>
+					<thead>
+						<tr>
+							<th><strong>Lp.</strong></th>
+							<th><strong>Server</strong></th>
+							<th><strong>TOPLANE</strong></th>
+							<th><strong>JUNGLE</strong></th>
+							<th><strong>MIDLANE</strong></th>
+							<th><strong>BOTTOM</strong></th>
+							<th><strong>SUPPORT</strong></th>
+							<th><strong>CLASH DATE</strong></th>
+							<th><strong>HOST DIVISION</strong></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for guest_team in guest_teams %}
+						<tr>
+							<td>{{ loop.index }}</td>
+							<td>{{ guest_team.host.server }}</td>
+							<td>
+								{% if guest_team.toplane %}
+								<a href="{{ url_for('profile', nickname=guest_team.toplane, server=get_server_short_name(guest_team.host.server).lower()) }}">{{ guest_team.toplane }}</a>
+									{% if user.profiles.filter_by(nickname=guest_team.toplane, server=guest_team.host.server).all() %}
+										<a href="{{ url_for('leave_team',username=user.username, team_id=guest_team.id, profile=guest_team.toplane) }}">leave</a>
+									{% endif %}
+								{% else %}
+								<a></a>
+								{% endif %}
+							</td>
+							<td>
+								{% if guest_team.jungle %}
+								<a
+									href="{{ url_for('profile', nickname=guest_team.jungle, server=get_server_short_name(guest_team.host.server).lower()) }}">{{
+									guest_team.jungle }}</a>
+									{% if user.profiles.filter_by(nickname=guest_team.jungle, server=guest_team.host.server).all() %}
+										<a href="{{ url_for('leave_team',username=user.username, team_id=guest_team.id, profile=guest_team.jungle) }}">leave</a>
+									{% endif %}
+								{% else %}
+								<a></a>
+								{% endif %}
+							</td>
+							<td>
+								{% if guest_team.midlane %}
+								<a
+									href="{{ url_for('profile', nickname=guest_team.midlane, server=get_server_short_name(guest_team.host.server).lower()) }}">{{
+									guest_team.midlane }}</a>
+									{% if user.profiles.filter_by(nickname=guest_team.midlane, server=guest_team.host.server).all() %}
+										<a href="{{ url_for('leave_team',username=user.username, team_id=guest_team.id, profile=guest_team.midlane) }}">leave</a>
+									{% endif %}
+								{% else %}
+								<a></a>
+								{% endif %}
+							</td>
+							<td>
+								{% if guest_team.bottom %}
+								<a
+									href="{{ url_for('profile', nickname=guest_team.bottom, server=get_server_short_name(guest_team.host.server).lower()) }}">{{
+									guest_team.bottom }}</a>
+										{% if user.profiles.filter_by(nickname=guest_team.bottom, server=guest_team.host.server).all() %}
+										<a href="{{ url_for('leave_team',username=user.username, team_id=guest_team.id, profile=guest_team.bottom) }}">leave</a>
+									{% endif %}
+								{% else %}
+								<a></a>
+								{% endif %}
+							</td>
+							<td>
+								{% if guest_team.support %}
+								<a
+									href="{{ url_for('profile', nickname=guest_team.support, server=get_server_short_name(guest_team.host.server).lower()) }}">{{
+									guest_team.support }}</a>
+									{% if user.profiles.filter_by(nickname=guest_team.support, server=guest_team.host.server).all() %}
+										<a href="{{ url_for('leave_team',username=user.username, team_id=guest_team.id, profile=guest_team.support) }}">leave</a>
+									{% endif %}
+								{% else %}
+								<a></a>
+								{% endif %}
+							</td>
+							<td>{{ guest_team.formatted_clash_date() or '' }}</td>
+							<td>{{ guest_team.division or '' }}</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				{% else %}
+				<p>Currently not belonging to any Clash Team.</p>
+				{% endif %}
+			</div>
+			<div style="height: 20px;"></div>
+			<!-- Przycisk do strony z wyszukiwaniem druzyn -->
+			<a href="{{ url_for('findteam') }}" class="btn btn-primary btn-lg">Find Team</a>
+			<div style="height: 20px;"></div>
+			<h2>Create your Clash Team</h2>
+			<form method="POST" action="{{ url_for('createteam', username=user.username) }}">
+				{{ form.hidden_tag() }}
+				<div class="form-group">
+					{{ form.profile.label(class="form-control-label") }}
+					{{ form.profile(class="form-control form-control-sm") }}
+				</div>
+				<div class="form-group">
+					{{ form.role.label(class="form-control-label") }}
+					{{ form.role(class="form-control form-control-sm") }}
+				</div>
+				<div class="form-group">
+					{{ form.clash_date.label(class="form-control-label") }}
+					{{ form.clash_date(type='datetime-local', class="form-control form-control-sm") }}
+				</div>
+				<button type="submit" class="btn btn-primary">{{ form.submit.label }}</button>
+			</form>
+		</div>
+	</div>
+</div>
+{% else %}
+<p>You do not have access to this page.</p>
+{% endif %}
+<!-- end block content here -->
+{% endblock %}
