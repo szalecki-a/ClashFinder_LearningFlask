@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, SelectMultipleField, HiddenField, DateField
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
+from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Optional
 from models import Profile
 from wtforms import DateTimeLocalField
 from datetime import datetime, timedelta
@@ -11,26 +11,28 @@ positions = [(None, ''), ('Toplane', 'Toplane'), ('Jungle', 'Jungle'),
              ('Midlane', 'Midlane'), ('Bottom', 'Bottom'), ('Support', 'Support')]
 divisions = [(None, ''), ('Iron', 'Iron'), ('Bronze', 'Bronze'), ('Silver', 'Silver'), ('Gold', 'Gold'), ('Platinum', 'Platinum'),
              ('Diamond', 'Diamond'), ('Master', 'Master'), ('Grandmaster', 'Grandmaster'), ('Challenger', 'Challenger')]
-months = [(1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'), (5, 'May'), (6, 'June'),
-          (7, 'July'), (8, 'August'), (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')]
-months_days = {'January': 31, 'February': 28, 'March': 31, 'April': 30, 'May': 31, 'June': 30,
-               'July': 31, 'August': 31, 'September': 30, 'October': 31, 'November': 30, 'December': 31}
-month_dict = {month_name: month_num for month_num, month_name in months}
-month_dict2 = {month_num: month_name for month_num, month_name in months}
+
+ROLES_DICT = {
+    'Toplane': 'toplane',
+    'Jungle': 'jungle',
+    'Midlane': 'midlane',
+    'Bottom': 'bottom',
+    'Support': 'support',
+}
 
 
 def get_server_short_name(server_name):
     for server in servers:
         if server[0] == server_name:
             return server[1]
-    return ''
+    return None
 
 
 def get_server_name_from_short(short_name):
     for server in servers:
         if server[1] == short_name:
             return server[0]
-    return ''
+    return None
 
 
 def validate_date(form, field):
@@ -43,6 +45,9 @@ def validate_date(form, field):
         raise ValidationError(
             'Date should be less than or equal to one year from now')
 
+def optional_date(form, field):
+    if field.data is None:
+        pass
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -116,11 +121,10 @@ class CreatingTeam(FlaskForm):
 
 # klasa wyszukiwania do utworzonych drużyn
 class SearchingTeam(FlaskForm):
-    profile = SelectField('Profile', validators=[
-                          DataRequired()], choices=[], default=None)
+    profile = SelectField('Profile', validators=[DataRequired()], choices=[])
     role = SelectField('Select Role', choices=positions)
     division = SelectField('Host Division', choices=divisions)
-    date = DateField('Date', format='%Y-%m-%d')
+    date = DateField('Date', format='%Y-%m-%d', validators=[Optional()])
     submit = SubmitField('Search')
 
     def __init__(self, user_id, *args, **kwargs):
@@ -173,29 +177,3 @@ class AnswerForm(FlaskForm):
     accept_button = SubmitField('Accept')
     reject_button = SubmitField('Reject')
     delete_button = SubmitField('Withdraw invitation')
-
-
-'''
-# wysyłanie raportów
-class SendReport(FlaskForm):
-    title = StringField('Reason for reporting', validators=[DataRequired()])
-    text = StringField('Short description', validators=[DataRequired()])
-    submit = SubmitField('Send Report')
-
-
-class DestinationForm(FlaskForm):
-    city = StringField('city')
-    country = StringField('country')
-    description = StringField('description')
-    submit = SubmitField('Post')
-
-    def validate_username(self, username):
-        user = User.query.filter_by(username=username.data).first()
-        if user is not None:
-            raise ValidationError('Please use a different username.')
-
-    def validate_email(self, email):
-        user = User.query.filter_by(email=email.data).first()
-        if user is not None:
-            raise ValidationError('Please use a different email address.')
-'''
